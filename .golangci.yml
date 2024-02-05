@@ -1,0 +1,24 @@
+linters:
+  enable:
+    - errorlint
+    - godot
+    - goimports
+    - lll
+    - revive
+    - stylecheck
+    - testpackage
+    - unconvert
+    - unused
+
+linters-settings:
+  godot:
+    scope: all
+  lll:
+    line-length: 100
+    tab-width: 4
+
+issues:
+  exclude-rules:
+    - linters:
+      - lll
+      source: "\t?// (see )?https://"
