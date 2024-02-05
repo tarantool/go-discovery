@@ -1,0 +1,4 @@
+[codespell]
+skip = ./.git,./testdata,./LICENSE,./go.mod,./go.sum
+count =
+quiet-level = 3
