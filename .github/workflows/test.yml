@@ -1,0 +1,110 @@
+name: testing
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  tests:
+    # We want to run on external PRs, but not on our own internal
+    # PRs as they'll be run by the push to the branch.
+    #
+    # The main trick is described here:
+    # https://github.com/Dart-Code/Dart-Code/pull/2375
+    #
+    # Also we want to run it always for manually triggered workflows.
+    if: (github.event_name == 'push') ||
+      (github.event_name == 'pull_request' &&
+        github.event.pull_request.head.repo.full_name != github.repository) ||
+      (github.event_name == 'workflow_dispatch')
+
+    runs-on: [ self-hosted, Linux, x86_64, regular ]
+
+    container:
+      image: ubuntu:22.04
+
+    strategy:
+      fail-fast: false
+      matrix:
+        golang:
+          - '1.20'
+          - '1.21'
+        tarantool:
+          - '3.0.1'
+          - 'master'
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Setup requirements
+      run: |
+        echo "" > /etc/dpkg/dpkg.cfg.d/excludes
+        apt update
+        DEBIAN_FRONTEND=noninteractive apt install -y \
+          autoconf \
+          automake \
+          build-essential \
+          cmake \
+          curl \
+          gcc \
+          git \
+          libtool \
+          make \
+          rsync \
+          software-properties-common \
+          sudo \
+          tzdata \
+          unzip
+        update-ca-certificates
+
+    - name: Setup tt
+      run: |
+        curl -L https://tarantool.io/release/2/installer.sh | bash
+        apt install -y tt
+
+    - name: Get Tarantool master commit
+      if: matrix.tarantool == 'master'
+      run: |
+        hash=$(git ls-remote https://github.com/tarantool/tarantool.git --branch master | head -c 8)
+        echo "VERSION=${hash}" >> $GITHUB_ENV
+      shell: bash
+
+    - name: Get Tarantool version
+      if: matrix.tarantool != 'master'
+      run: |
+        echo "VERSION=${{ matrix.tarantool }}" >> $GITHUB_ENV
+      shell: bash
+
+    - name: Get Tarantool ${{ matrix.tarantool }} from cache
+      id: cache-tarantool
+      uses: actions/cache@v3
+      with:
+        path: ${{ github.workspace }}/bin
+        key: cache-tarantool-${{ env.VERSION }}
+
+    - name: Setup Tarantool ${{ matrix.tarantool }}
+      if: steps.cache-tarantool.outputs.cache-hit != 'true'
+      run: |
+        tt init
+        tt install tarantool ${{ matrix.tarantool }}
+
+    - name: Add Tarantool master to PATH
+      run: echo "${GITHUB_WORKSPACE}/bin" >> $GITHUB_PATH
+
+    - name: Setup etcd
+      uses: ./.github/actions/setup-etcd
+
+    - name: Setup golang ${{ matrix.golang }}
+      uses: actions/setup-go@v3
+      with:
+        go-version: ${{ matrix.golang }}
+
+    # TAGS=go_tarantool_ssl_disable could be removed after go-tarantool release
+    # v2.0.0
+
+    - name: Run tests
+      run: make test TAGS=go_tarantool_ssl_disable
+
+    - name: Run tests with a race detector
+      run: make testrace TAGS=go_tarantool_ssl_disable
