@@ -6,12 +6,16 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"sync"
 	"testing"
 	"time"
 
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	clientv3 "go.etcd.io/etcd/client/v3"
 
+	"github.com/tarantool/go-discovery"
+	"github.com/tarantool/go-discovery/scheduler"
 	"github.com/tarantool/go-tarantool/v2"
 	"github.com/tarantool/go-tarantool/v2/test_helpers"
 )
@@ -248,4 +252,114 @@ func TestEtcdWorks(t *testing.T) {
 	data := etcdGet(t, etcd, key)
 
 	require.Equal(t, value, data)
+}
+
+func TestEtcdWatchScheduler_Etcd_Wait(t *testing.T) {
+	cases := []struct {
+		name    string
+		key     string
+		success bool
+	}{
+		{
+			name:    "Full key",
+			key:     "key",
+			success: true,
+		},
+		{
+			name:    "Prefix",
+			key:     "key_prefix",
+			success: true,
+		},
+		{
+			name:    "Wrong key",
+			key:     "no_prefix_key",
+			success: false,
+		},
+	}
+
+	defer stopEtcd(t, startEtcd(t, etcdHTTPEndpoint, etcdOpts{}))
+
+	etcd, err := clientv3.New(clientv3.Config{
+		Endpoints:   []string{etcdHTTPEndpoint},
+		DialTimeout: etcdTimeout,
+	})
+	require.NoError(t, err)
+	require.NotNil(t, etcd)
+	defer etcd.Close()
+
+	scheduler := scheduler.NewEtcdWatch(etcd, "key")
+
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			ctx, cancel := context.WithCancel(context.Background())
+			defer cancel()
+
+			wg := sync.WaitGroup{}
+
+			wg.Add(1)
+			go func() {
+				err = scheduler.Wait(ctx)
+				if tc.success {
+					assert.NoError(t, err)
+				} else {
+					assert.Error(t, discovery.ErrSchedulerStopped, err)
+				}
+				wg.Done()
+			}()
+
+			etcdPut(t, etcd, tc.key, "value")
+
+			if !tc.success {
+				scheduler.Stop()
+			}
+			wg.Wait()
+		})
+	}
+}
+
+func TestEtcdWatchScheduler_Etcd_Stop(t *testing.T) {
+	defer stopEtcd(t, startEtcd(t, etcdHTTPEndpoint, etcdOpts{}))
+
+	etcd, err := clientv3.New(clientv3.Config{
+		Endpoints:   []string{etcdHTTPEndpoint},
+		DialTimeout: etcdTimeout,
+	})
+	require.NoError(t, err)
+	require.NotNil(t, etcd)
+	defer etcd.Close()
+
+	scheduler := scheduler.NewEtcdWatch(etcd, "key")
+
+	ctx := context.Background()
+
+	wg := sync.WaitGroup{}
+	wg.Add(1)
+	go func() {
+		err = scheduler.Wait(ctx)
+		assert.Equal(t, discovery.ErrSchedulerStopped, err)
+		wg.Done()
+	}()
+
+	scheduler.Stop()
+	wg.Wait()
+}
+
+func TestEtcdWatchScheduler_Etcd_CloseStop(t *testing.T) {
+	defer stopEtcd(t, startEtcd(t, etcdHTTPEndpoint, etcdOpts{}))
+
+	etcd, err := clientv3.New(clientv3.Config{
+		Endpoints:   []string{etcdHTTPEndpoint},
+		DialTimeout: etcdTimeout,
+	})
+	require.NoError(t, err)
+	require.NotNil(t, etcd)
+
+	scheduler := scheduler.NewEtcdWatch(etcd, "key")
+
+	ctx := context.Background()
+
+	etcd.Close()
+
+	err = scheduler.Wait(ctx)
+	assert.Equal(t, discovery.ErrSchedulerStopped, err)
 }
