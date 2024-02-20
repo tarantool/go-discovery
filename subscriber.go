@@ -1,6 +1,9 @@
 package discovery
 
-import "context"
+import (
+	"context"
+	"fmt"
+)
 
 // Subscriber is an interface that allows to subscribe to an instance
 // configuration update events.
@@ -15,3 +18,12 @@ type Subscriber interface {
 	// events to the observer after the call.
 	Unsubscribe(observer Observer)
 }
+
+var (
+	// ErrMissingObserver is an error that tells that the provided
+	// observer is nil.
+	ErrMissingObserver = fmt.Errorf("observer is missing")
+	// ErrUnsubscribe is an error argument for call to observer.Observe() while
+	// unsubscribing the observer.
+	ErrUnsubscribe = fmt.Errorf("unsubscribed")
+)
