@@ -17,7 +17,7 @@ type RoundRobinBalancer struct {
 func NewRoundRobinBalancer() *RoundRobinBalancer {
 	return &RoundRobinBalancer{
 		instancesByMode: map[discovery.Mode]*buffer.CircularBuffer[string]{
-			discovery.ModeAll: buffer.NewCircular[string](),
+			discovery.ModeAny: buffer.NewCircular[string](),
 			discovery.ModeRO:  buffer.NewCircular[string](),
 			discovery.ModeRW:  buffer.NewCircular[string](),
 		},
@@ -52,7 +52,7 @@ func (b *RoundRobinBalancer) Add(instance discovery.Instance) {
 	}
 
 	instances.Push(instance.Name)
-	b.instancesByMode[discovery.ModeAll].Push(instance.Name)
+	b.instancesByMode[discovery.ModeAny].Push(instance.Name)
 }
 
 // Next returns next instance.
