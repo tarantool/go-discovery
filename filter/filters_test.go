@@ -114,17 +114,17 @@ func TestFilters(t *testing.T) {
 			Instance: discovery.Instance{Mode: discovery.ModeRW},
 			Filter: filter.ModeOneOf{
 				[]discovery.Mode{
-					discovery.ModeAll,
+					discovery.ModeAny,
 					discovery.ModeRO,
 				}},
 			Expected: false,
 		},
 		{
 			Name:     "mode_one_of_match",
-			Instance: discovery.Instance{Mode: discovery.ModeAll},
+			Instance: discovery.Instance{Mode: discovery.ModeAny},
 			Filter: filter.ModeOneOf{
 				[]discovery.Mode{
-					discovery.ModeAll,
+					discovery.ModeAny,
 					discovery.ModeRO,
 				}},
 			Expected: true,

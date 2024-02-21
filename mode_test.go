@@ -13,7 +13,7 @@ func TestMode_String(t *testing.T) {
 		Mode     discovery.Mode
 		Expected string
 	}{
-		{discovery.ModeAll, "all"},
+		{discovery.ModeAny, "any"},
 		{discovery.ModeRO, "ro"},
 		{discovery.ModeRW, "rw"},
 		{discovery.Mode(3), "Mode(3)"},
