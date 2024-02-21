@@ -7,8 +7,8 @@ type Mode int
 
 //nolint:godot
 const (
-	// ModeAll is used when a target instance could be both.
-	ModeAll Mode = iota // all
+	// ModeAny is used when a target instance could be both.
+	ModeAny Mode = iota // any
 	// ModeRO defines a read-only instance.
 	ModeRO // ro
 	// ModeRW defines a read-write instance.

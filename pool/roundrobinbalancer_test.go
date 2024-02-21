@@ -17,7 +17,7 @@ func TestRRBalancer_AddAndGet(t *testing.T) {
 	require.NotNil(t, rrBalancer)
 
 	gen := func(n int) string { return fmt.Sprintf("inst_%d", n) }
-	mode := discovery.ModeAll
+	mode := discovery.ModeAny
 	instPerMode := 10
 	for i := 0; i < 30; i++ {
 		if i == 10 {
@@ -32,7 +32,7 @@ func TestRRBalancer_AddAndGet(t *testing.T) {
 	}
 
 	for i := 0; i < 60; i++ {
-		name, ok := rrBalancer.Next(discovery.ModeAll)
+		name, ok := rrBalancer.Next(discovery.ModeAny)
 		assert.True(t, ok)
 		assert.Equal(t, gen(i%30), name)
 	}
@@ -76,7 +76,7 @@ func TestRRBalancer_Overwrite(t *testing.T) {
 	}
 	// Check all mode. Nothing is changed.
 	for i := 0; i < 20; i++ {
-		name, ok := rrBalancer.Next(discovery.ModeAll)
+		name, ok := rrBalancer.Next(discovery.ModeAny)
 		assert.True(t, ok)
 		assert.Equal(t, strconv.Itoa(i%10), name)
 	}
@@ -105,7 +105,7 @@ func TestRRBalancer_RemovingInstances(t *testing.T) {
 	require.NotNil(t, rrBalancer)
 
 	gen := func(n int) string { return fmt.Sprintf("inst_%d", n) }
-	mode := discovery.ModeAll
+	mode := discovery.ModeAny
 	for i := 0; i < 30; i++ {
 		if i == 10 {
 			mode = discovery.ModeRO
@@ -126,17 +126,17 @@ func TestRRBalancer_RemovingInstances(t *testing.T) {
 
 	// All.
 	for i := 5; i <= 10; i++ {
-		name, ok := rrBalancer.Next(discovery.ModeAll)
+		name, ok := rrBalancer.Next(discovery.ModeAny)
 		assert.True(t, ok)
 		assert.Equal(t, gen(i), name)
 	}
 	for i := 16; i < 28; i++ {
-		name, ok := rrBalancer.Next(discovery.ModeAll)
+		name, ok := rrBalancer.Next(discovery.ModeAny)
 		assert.True(t, ok)
 		assert.Equal(t, gen(i), name)
 	}
 	for i := 5; i <= 10; i++ {
-		name, ok := rrBalancer.Next(discovery.ModeAll)
+		name, ok := rrBalancer.Next(discovery.ModeAny)
 		assert.True(t, ok)
 		assert.Equal(t, gen(i), name)
 	}
@@ -305,7 +305,7 @@ func TestRRBalancer_AsyncRemove(t *testing.T) {
 		require.Equal(t, gen(i%500+1000), name)
 	}
 	for i := 500; i < 2500; i++ {
-		name, ok := rrBalancer.Next(discovery.ModeAll)
+		name, ok := rrBalancer.Next(discovery.ModeAny)
 		require.True(t, ok)
 		require.Equal(t, gen(i%1000+500), name)
 	}
