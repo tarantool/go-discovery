@@ -29,19 +29,19 @@ var ErrMissingEtcd = fmt.Errorf("etcd object is missing")
 // configurations from etcd.
 //
 // The prefix must have the same value as config.etcd.prefix.
-func NewEtcd(etcd clientv3.KV, prefix string) (*Etcd, error) {
-	if etcd == nil {
-		return nil, ErrMissingEtcd
-	}
-
+func NewEtcd(etcd clientv3.KV, prefix string) *Etcd {
 	return &Etcd{
 		etcd:   etcd,
 		prefix: prefix,
-	}, nil
+	}
 }
 
 // Discovery retrieves a list of instance configurations from etcd.
 func (d *Etcd) Discovery(ctx context.Context) ([]discovery.Instance, error) {
+	if d.etcd == nil {
+		return nil, ErrMissingEtcd
+	}
+
 	const (
 		fmtMissed = "a configuration data not found in etcd for prefix \"%s/config/\""
 	)
