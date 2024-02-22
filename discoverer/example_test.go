@@ -29,12 +29,7 @@ func ExampleEtcd_Discovery() {
 	}
 	defer etcd.Close()
 
-	etcddiscoverer, err := discoverer.NewEtcd(etcd, "foo")
-	if err != nil {
-		fmt.Println("Unable to create etcd discoverer:", err)
-		return
-	}
-
+	etcddiscoverer := discoverer.NewEtcd(etcd, "foo")
 	instances, err := etcddiscoverer.Discovery(context.Background())
 
 	fmt.Println("Without keys in the prefix:")
@@ -125,12 +120,7 @@ func ExampleEtcd_Discovery_cancelled() {
 	ctx, cancel := context.WithCancel(context.Background())
 	cancel()
 
-	etcddiscoverer, err := discoverer.NewEtcd(etcd, "foo")
-	if err != nil {
-		fmt.Println("Unable to create etcd discoverer:", err)
-		return
-	}
-
+	etcddiscoverer := discoverer.NewEtcd(etcd, "foo")
 	instances, err := etcddiscoverer.Discovery(ctx)
 
 	fmt.Println(instances)

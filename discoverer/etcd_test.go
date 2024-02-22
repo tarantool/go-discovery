@@ -15,6 +15,8 @@ import (
 	"github.com/tarantool/go-discovery/discoverer"
 )
 
+var _ discovery.Discoverer = discoverer.NewEtcd(nil, "foo")
+
 type etcdGetterMock struct {
 	clientv3.KV
 	Ctx      context.Context
@@ -35,9 +37,12 @@ func (m *etcdGetterMock) Get(ctx context.Context, key string,
 }
 
 func TestNewEtcd_missing(t *testing.T) {
-	etcd, err := discoverer.NewEtcd(nil, "foo")
-	assert.Nil(t, etcd)
-	require.ErrorIs(t, err, discoverer.ErrMissingEtcd)
+	etcd := discoverer.NewEtcd(nil, "foo")
+	require.NotNil(t, etcd)
+
+	instances, err := etcd.Discovery(context.Background())
+	assert.Nil(t, instances)
+	assert.ErrorIs(t, err, discoverer.ErrMissingEtcd)
 }
 
 func TestEtcd_EtcdGetter_call_args(t *testing.T) {
@@ -45,9 +50,8 @@ func TestEtcd_EtcdGetter_call_args(t *testing.T) {
 		Err: fmt.Errorf("any"),
 	}
 
-	etcd, err := discoverer.NewEtcd(&mock, "foo")
+	etcd := discoverer.NewEtcd(&mock, "foo")
 	require.NotNil(t, etcd)
-	assert.NoError(t, err)
 
 	instances, err := etcd.Discovery(context.Background())
 	assert.Nil(t, instances)
@@ -67,9 +71,8 @@ func TestEtcd_EtcdGetter_ctx_deadline(t *testing.T) {
 		Err: fmt.Errorf("any"),
 	}
 
-	etcd, err := discoverer.NewEtcd(&mock, "foo")
+	etcd := discoverer.NewEtcd(&mock, "foo")
 	require.NotNil(t, etcd)
-	assert.NoError(t, err)
 
 	var duration = time.Second
 	ctx, cancel := context.WithTimeout(context.Background(), duration)
@@ -90,9 +93,8 @@ func TestEtcd_EtcdGetter_return_error(t *testing.T) {
 		Err: fmt.Errorf("any"),
 	}
 
-	etcd, err := discoverer.NewEtcd(&mock, "foo")
+	etcd := discoverer.NewEtcd(&mock, "foo")
 	require.NotNil(t, etcd)
-	assert.NoError(t, err)
 
 	instances, err := etcd.Discovery(context.Background())
 
@@ -106,9 +108,8 @@ func TestEtcd_EtcdGetter_return_deadline_error_retry(t *testing.T) {
 		Err: fmt.Errorf("any: %w", context.DeadlineExceeded),
 	}
 
-	etcd, err := discoverer.NewEtcd(&mock, "foo")
+	etcd := discoverer.NewEtcd(&mock, "foo")
 	require.NotNil(t, etcd)
-	assert.NoError(t, err)
 
 	var duration = 500 * time.Millisecond
 	ctx, cancel := context.WithTimeout(context.Background(), duration)
@@ -135,9 +136,8 @@ func TestEtcd_Discovery_invalid_data(t *testing.T) {
 		},
 	}
 
-	etcd, err := discoverer.NewEtcd(&mock, "foo")
+	etcd := discoverer.NewEtcd(&mock, "foo")
 	require.NotNil(t, etcd)
-	assert.NoError(t, err)
 
 	instances, err := etcd.Discovery(context.Background())
 
@@ -156,9 +156,8 @@ func TestEtcd_Discovery_invalid_cluster_config(t *testing.T) {
 		},
 	}
 
-	etcd, err := discoverer.NewEtcd(&mock, "foo")
+	etcd := discoverer.NewEtcd(&mock, "foo")
 	require.NotNil(t, etcd)
-	assert.NoError(t, err)
 
 	instances, err := etcd.Discovery(context.Background())
 
@@ -706,9 +705,8 @@ groups:
 				},
 			}
 
-			etcd, err := discoverer.NewEtcd(&mock, "foo")
+			etcd := discoverer.NewEtcd(&mock, "foo")
 			require.NotNil(t, etcd)
-			assert.NoError(t, err)
 
 			instances, err := etcd.Discovery(context.Background())
 			assert.ElementsMatch(t, tc.Expected, instances)

@@ -23,15 +23,11 @@ var ErrMissingDiscoverer = fmt.Errorf("an inner discoverer is missing")
 // It wraps the inner discoverer to filter its results according to
 // passed filters.
 func NewFilter(discoverer discovery.Discoverer,
-	filters ...discovery.Filter) (*Filter, error) {
-	if discoverer == nil {
-		return nil, ErrMissingDiscoverer
-	}
-
+	filters ...discovery.Filter) *Filter {
 	return &Filter{
 		discoverer: discoverer,
 		filters:    filters,
-	}, nil
+	}
 }
 
 // Discovery calls Discovery of an inner discoverer and returns a filtered
@@ -41,6 +37,10 @@ func NewFilter(discoverer discovery.Discoverer,
 // If the program is stuck on one of the Filter calls, context cancel would
 // not cancel the method.
 func (d *Filter) Discovery(ctx context.Context) ([]discovery.Instance, error) {
+	if d.discoverer == nil {
+		return nil, ErrMissingDiscoverer
+	}
+
 	instances, err := d.discoverer.Discovery(ctx)
 	if err != nil {
 		return instances, err
