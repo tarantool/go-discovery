@@ -479,14 +479,28 @@ groups:
 					Replicaset: "bar",
 					Name:       "zoo",
 					Mode:       discovery.ModeRO,
-					URI:        []string{"foo"},
+					Endpoints: []discovery.Endpoint{
+						discovery.Endpoint{
+							URI:       "foo",
+							Transport: discovery.TransportSSL,
+						},
+					},
 				},
 				discovery.Instance{
 					Group:      "foo",
 					Replicaset: "bar",
 					Name:       "car",
 					Mode:       discovery.ModeRO,
-					URI:        []string{"zoo", "bar"},
+					Endpoints: []discovery.Endpoint{
+						discovery.Endpoint{
+							URI:       "zoo",
+							Transport: discovery.TransportPlain,
+						},
+						discovery.Endpoint{
+							URI:       "bar",
+							Transport: discovery.TransportPlain,
+						},
+					},
 				},
 			},
 		},
@@ -658,9 +672,11 @@ groups:
               listen:
               - uri: localhost:3011
               - uri: localhost:3012
-                transport: ssl
+                params:
+                  transport: ssl
               - uri: localhost:3013
-                transport: plain
+                params:
+                  transport: plain
             roles: [crud]
             roles_cfg:
               tags:
@@ -679,10 +695,19 @@ groups:
 					Replicaset: "bar",
 					Name:       "zoo",
 					Mode:       discovery.ModeRO,
-					URI: []string{
-						"localhost:3011",
-						"localhost:3012",
-						"localhost:3013",
+					Endpoints: []discovery.Endpoint{
+						discovery.Endpoint{
+							URI:       "localhost:3011",
+							Transport: discovery.TransportPlain,
+						},
+						discovery.Endpoint{
+							URI:       "localhost:3012",
+							Transport: discovery.TransportSSL,
+						},
+						discovery.Endpoint{
+							URI:       "localhost:3013",
+							Transport: discovery.TransportPlain,
+						},
 					},
 					Roles:     []string{"crud"},
 					RolesTags: []string{"any", "bar", "3"},
