@@ -7,10 +7,10 @@ type EventType int
 
 //nolint:godot
 const (
-	// EventTypeAdded defines an instance configuration add event.
+	// EventTypeAdd defines an instance configuration add event.
 	EventTypeAdd EventType = iota // add
-	// EventTypeAdded defines an instance configuration update event.
+	// EventTypeUpdate defines an instance configuration update event.
 	EventTypeUpdate // update
-	// EventTypeAdded defines an instance configuration remove event.
+	// EventTypeRemove defines an instance configuration remove event.
 	EventTypeRemove // remove
 )

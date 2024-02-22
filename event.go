@@ -7,7 +7,7 @@ type Event struct {
 	// Old refers to a previous configuration of the instance. The value
 	// present for EventTypeUpdate and EventTypeRemove.
 	Old Instance
-	// New refers to a new configuration of the instance. This value
-	// present for EventTypeUpdate and EventyTypeAdd.
+	// New refers to a new configuration of the instance. This value is
+	// present for EventTypeUpdate and EventTypeAdd.
 	New Instance
 }
