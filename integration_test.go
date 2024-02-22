@@ -15,6 +15,8 @@ import (
 	clientv3 "go.etcd.io/etcd/client/v3"
 
 	"github.com/tarantool/go-discovery"
+	"github.com/tarantool/go-discovery/discoverer"
+	"github.com/tarantool/go-discovery/filter"
 	"github.com/tarantool/go-discovery/scheduler"
 	"github.com/tarantool/go-tarantool/v2"
 	"github.com/tarantool/go-tarantool/v2/test_helpers"
@@ -362,4 +364,115 @@ func TestEtcdWatchScheduler_Etcd_CloseStop(t *testing.T) {
 
 	err = scheduler.Wait(ctx)
 	assert.Equal(t, discovery.ErrSchedulerStopped, err)
+}
+
+func TestEtcdWatchScheduler_and_EtcdDiscoverer(t *testing.T) {
+	defer stopEtcd(t, startEtcd(t, etcdHTTPEndpoint, etcdOpts{}))
+
+	etcd, err := clientv3.New(clientv3.Config{
+		Endpoints:   []string{etcdHTTPEndpoint},
+		DialTimeout: etcdTimeout,
+	})
+	require.NoError(t, err)
+	require.NotNil(t, etcd)
+	defer etcd.Close()
+
+	var wg sync.WaitGroup
+	wg.Add(1)
+
+	var (
+		instances []discovery.Instance
+	)
+	go func() {
+		defer wg.Done()
+
+		scheduler := scheduler.NewEtcdWatch(etcd, "/prefix/")
+		defer scheduler.Stop()
+
+		etcddiscoverer, err := discoverer.NewEtcd(etcd, "/prefix/")
+		require.NoError(t, err)
+
+		err := scheduler.Wait(context.Background())
+		require.NoError(t, err)
+
+		instances, err = etcddiscoverer.Discovery(context.Background())
+		require.NoError(t, err)
+	}()
+
+	_, err = etcd.Put(context.Background(), "/prefix/config/foo", `
+groups:
+  foo:
+    replicasets:
+      bar:
+        instances:
+          zoo: {}
+  zoo:
+    replicasets:
+      any:
+        instances:
+          foo: {}
+`)
+	require.NoError(t, err)
+
+	wg.Wait()
+
+	assert.ElementsMatch(t, []discovery.Instance{
+		discovery.Instance{
+			Group:      "foo",
+			Replicaset: "bar",
+			Name:       "zoo",
+			Mode:       discovery.ModeRW,
+		},
+		discovery.Instance{
+			Group:      "zoo",
+			Replicaset: "any",
+			Name:       "foo",
+			Mode:       discovery.ModeRW,
+		},
+	}, instances)
+}
+
+func TestDiscoverer_Etcd_and_Filter(t *testing.T) {
+	defer stopEtcd(t, startEtcd(t, etcdHTTPEndpoint, etcdOpts{}))
+
+	etcd, err := clientv3.New(clientv3.Config{
+		Endpoints:   []string{etcdHTTPEndpoint},
+		DialTimeout: etcdTimeout,
+	})
+	require.NoError(t, err)
+	require.NotNil(t, etcd)
+	defer etcd.Close()
+
+	_, err = etcd.Put(context.Background(), "/prefix/config/foo", `
+groups:
+  foo:
+    replicasets:
+      bar:
+        instances:
+          zoo: {}
+  zoo:
+    replicasets:
+      any:
+        instances:
+          foo: {}
+`)
+	require.NoError(t, err)
+
+	etcddiscoverer, err := discoverer.NewEtcd(etcd, "/prefix")
+	require.NoError(t, err)
+	filterdiscoverer, err := discoverer.NewFilter(etcddiscoverer,
+		filter.NameOneOf{Names: []string{"foo"}})
+	require.NoError(t, err)
+
+	instances, err := filterdiscoverer.Discovery(context.Background())
+	require.NoError(t, err)
+
+	assert.ElementsMatch(t, []discovery.Instance{
+		discovery.Instance{
+			Group:      "zoo",
+			Replicaset: "any",
+			Name:       "foo",
+			Mode:       discovery.ModeRW,
+		},
+	}, instances)
 }
