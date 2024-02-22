@@ -388,14 +388,12 @@ func TestEtcdWatchScheduler_and_EtcdDiscoverer(t *testing.T) {
 
 		scheduler := scheduler.NewEtcdWatch(etcd, "/prefix/")
 		defer scheduler.Stop()
-
-		etcddiscoverer, err := discoverer.NewEtcd(etcd, "/prefix/")
-		require.NoError(t, err)
+		disc := discoverer.NewEtcd(etcd, "/prefix/")
 
 		err := scheduler.Wait(context.Background())
 		require.NoError(t, err)
 
-		instances, err = etcddiscoverer.Discovery(context.Background())
+		instances, err = disc.Discovery(context.Background())
 		require.NoError(t, err)
 	}()
 
@@ -458,13 +456,10 @@ groups:
 `)
 	require.NoError(t, err)
 
-	etcddiscoverer, err := discoverer.NewEtcd(etcd, "/prefix")
-	require.NoError(t, err)
-	filterdiscoverer, err := discoverer.NewFilter(etcddiscoverer,
+	disc := discoverer.NewFilter(discoverer.NewEtcd(etcd, "/prefix"),
 		filter.NameOneOf{Names: []string{"foo"}})
-	require.NoError(t, err)
 
-	instances, err := filterdiscoverer.Discovery(context.Background())
+	instances, err := disc.Discovery(context.Background())
 	require.NoError(t, err)
 
 	assert.ElementsMatch(t, []discovery.Instance{

@@ -10,6 +10,8 @@ import (
 	"github.com/tarantool/go-discovery/discoverer"
 )
 
+var _ discovery.Discoverer = discoverer.NewFilter(nil)
+
 type mockDiscoverer struct {
 	instances []discovery.Instance
 }
@@ -70,9 +72,7 @@ func TestFilter_Discovery(t *testing.T) {
 			innerDisc := &mockDiscoverer{instances: instances}
 			ctx := context.Background()
 
-			disc, err := discoverer.NewFilter(innerDisc, tc.filter)
-			assert.NoError(t, err)
-
+			disc := discoverer.NewFilter(innerDisc, tc.filter)
 			retInst, err := disc.Discovery(ctx)
 
 			assert.NoError(t, err)
@@ -111,8 +111,7 @@ func TestFilter_Discovery_multipleFilters(t *testing.T) {
 	innerDisc := &mockDiscoverer{instances: instances}
 	ctx := context.Background()
 
-	disc, err := discoverer.NewFilter(innerDisc, filterGroup, filterName)
-	assert.NoError(t, err)
+	disc := discoverer.NewFilter(innerDisc, filterGroup, filterName)
 
 	retInst, err := disc.Discovery(ctx)
 
@@ -126,8 +125,7 @@ func TestFilter_DiscoveryContextCancel(t *testing.T) {
 	}
 	innerDisc := &mockDiscoverer{instances: instances}
 
-	disc, err := discoverer.NewFilter(innerDisc)
-	assert.NoError(t, err)
+	disc := discoverer.NewFilter(innerDisc)
 
 	ctx, cancel := context.WithCancel(context.Background())
 	cancel()
@@ -139,8 +137,10 @@ func TestFilter_DiscoveryContextCancel(t *testing.T) {
 }
 
 func TestFilter_Discovery_nilDiscoverer(t *testing.T) {
-	disc, err := discoverer.NewFilter(nil)
+	disc := discoverer.NewFilter(nil)
+	assert.NotNil(t, disc)
 
-	assert.Nil(t, disc)
+	instances, err := disc.Discovery(context.Background())
+	assert.Nil(t, instances)
 	assert.Equal(t, discoverer.ErrMissingDiscoverer, err)
 }
