@@ -49,9 +49,11 @@ groups:
               listen:
               - uri: localhost:3011
               - uri: localhost:3012
-                transport: ssl
+                params:
+                  transport: ssl
               - uri: localhost:3013
-                transport: plain
+                params:
+                  transport: plain
             roles: [crud]
             roles_cfg:
               tags:
@@ -78,7 +80,7 @@ groups:
 		fmt.Println("Replicaset:", instance.Replicaset)
 		fmt.Println("Name:", instance.Name)
 		fmt.Println("Mode:", instance.Mode.String())
-		fmt.Println("URI:", instance.URI)
+		fmt.Println("Endpoints:", instance.Endpoints)
 		fmt.Println("Roles:", instance.Roles)
 		fmt.Println("RolesTags:", instance.RolesTags)
 		fmt.Println("AppTags:", instance.AppTags)
@@ -96,7 +98,7 @@ groups:
 	// Replicaset: bar
 	// Name: zoo
 	// Mode: ro
-	// URI: [localhost:3011 localhost:3012 localhost:3013]
+	// Endpoints: [{localhost:3011 plain} {localhost:3012 ssl} {localhost:3013 plain}]
 	// Roles: [crud]
 	// RolesTags: [any bar 3]
 	// AppTags: [foo bar]

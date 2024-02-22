@@ -32,8 +32,11 @@ func TestNetDialerFactory_NewDialer(t *testing.T) {
 				"password",
 			},
 			args: args{discovery.Instance{
-				URI: []string{
-					"localhost:3301",
+				Endpoints: []discovery.Endpoint{
+					discovery.Endpoint{
+						URI:       "localhost:3301",
+						Transport: discovery.TransportPlain,
+					},
 				},
 			}},
 			want: tarantool.NetDialer{
@@ -49,9 +52,15 @@ func TestNetDialerFactory_NewDialer(t *testing.T) {
 				"pwd",
 			},
 			args: args{discovery.Instance{
-				URI: []string{
-					"localhost:3301",
-					"unix://tmp/iproto.sock",
+				Endpoints: []discovery.Endpoint{
+					discovery.Endpoint{
+						URI:       "localhost:3301",
+						Transport: discovery.TransportPlain,
+					},
+					discovery.Endpoint{
+						URI:       "unix://tmp/iproto.sock",
+						Transport: discovery.TransportPlain,
+					},
 				},
 			}},
 			want: tarantool.NetDialer{
@@ -67,9 +76,15 @@ func TestNetDialerFactory_NewDialer(t *testing.T) {
 				"pwd",
 			},
 			args: args{discovery.Instance{
-				URI: []string{
-					"localhost:3301",
-					"localhost:3302",
+				Endpoints: []discovery.Endpoint{
+					discovery.Endpoint{
+						URI:       "localhost:3301",
+						Transport: discovery.TransportPlain,
+					},
+					discovery.Endpoint{
+						URI:       "localhost:3302",
+						Transport: discovery.TransportPlain,
+					},
 				},
 			}},
 			want: tarantool.NetDialer{
@@ -79,13 +94,94 @@ func TestNetDialerFactory_NewDialer(t *testing.T) {
 			},
 		},
 		{
-			name: "No URIs",
+			name: "Skip SSL transport",
 			factoryArgs: factoryArgs{
 				"user",
 				"pwd",
 			},
 			args: args{discovery.Instance{
-				URI: []string{},
+				Endpoints: []discovery.Endpoint{
+					discovery.Endpoint{
+						URI:       "localhost:3301",
+						Transport: discovery.TransportSSL,
+					},
+					discovery.Endpoint{
+						URI:       "localhost:3302",
+						Transport: discovery.TransportPlain,
+					},
+				},
+			}},
+			want: tarantool.NetDialer{
+				Address:  "localhost:3302",
+				User:     "user",
+				Password: "pwd",
+			},
+		},
+		{
+			name: "Skip unix with SSL transport",
+			factoryArgs: factoryArgs{
+				"user",
+				"pwd",
+			},
+			args: args{discovery.Instance{
+				Endpoints: []discovery.Endpoint{
+					discovery.Endpoint{
+						URI:       "unix://tmp/iproto.sock",
+						Transport: discovery.TransportSSL,
+					},
+					discovery.Endpoint{
+						URI:       "localhost:3302",
+						Transport: discovery.TransportPlain,
+					},
+				},
+			}},
+			want: tarantool.NetDialer{
+				Address:  "localhost:3302",
+				User:     "user",
+				Password: "pwd",
+			},
+		},
+		{
+			name: "Empty Endpoints",
+			factoryArgs: factoryArgs{
+				"user",
+				"pwd",
+			},
+			args: args{discovery.Instance{
+				Endpoints: []discovery.Endpoint{},
+			}},
+			want:    tarantool.NetDialer{},
+			wantErr: true,
+		},
+		{
+			name: "Nil Endpoints",
+			factoryArgs: factoryArgs{
+				"user",
+				"pwd",
+			},
+			args: args{discovery.Instance{
+				Endpoints: nil,
+			}},
+			want:    tarantool.NetDialer{},
+			wantErr: true,
+		},
+		{
+			name: "No plain transport",
+			factoryArgs: factoryArgs{
+				"user",
+				"pwd",
+			},
+			args: args{discovery.Instance{
+				Endpoints: []discovery.Endpoint{
+					discovery.Endpoint{
+						URI:       "localhost:3301",
+						Transport: discovery.TransportSSL,
+					},
+					discovery.Endpoint{
+						URI:       "localhost:3302",
+						Transport: discovery.TransportSSL,
+					},
+				},
 			}},
 			want:    tarantool.NetDialer{},
 			wantErr: true,
