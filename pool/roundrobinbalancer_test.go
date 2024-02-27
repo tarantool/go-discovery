@@ -12,6 +12,8 @@ import (
 	"github.com/tarantool/go-discovery/pool"
 )
 
+var _ pool.Balancer = &pool.RoundRobinBalancer{}
+
 func TestRRBalancer_AddAndGet(t *testing.T) {
 	rrBalancer := pool.NewRoundRobinBalancer()
 	require.NotNil(t, rrBalancer)
