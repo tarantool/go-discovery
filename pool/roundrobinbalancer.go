@@ -34,13 +34,13 @@ func (b *RoundRobinBalancer) Remove(instNameToRemove string) {
 }
 
 // Add adds new instance name to the balancer.
-func (b *RoundRobinBalancer) Add(instance discovery.Instance) {
+func (b *RoundRobinBalancer) Add(instance discovery.Instance) bool {
 	b.mu.Lock()
 	defer b.mu.Unlock()
 
 	instances := b.instancesByMode[instance.Mode]
 	if instances.Contains(instance.Name) {
-		return // Already added.
+		return true // Already added.
 	}
 
 	// Remove instance name from other modes.
@@ -53,6 +53,7 @@ func (b *RoundRobinBalancer) Add(instance discovery.Instance) {
 
 	instances.Push(instance.Name)
 	b.instancesByMode[discovery.ModeAny].Push(instance.Name)
+	return true
 }
 
 // Next returns next instance.
