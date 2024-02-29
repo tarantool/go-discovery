@@ -383,12 +383,12 @@ func TestEtcdWatchScheduler_and_EtcdDiscoverer(t *testing.T) {
 	var (
 		instances []discovery.Instance
 	)
+
+	scheduler := scheduler.NewEtcdWatch(etcd, "/prefix/")
+	defer scheduler.Stop()
+	disc := discoverer.NewEtcd(etcd, "/prefix/")
 	go func() {
 		defer wg.Done()
-
-		scheduler := scheduler.NewEtcdWatch(etcd, "/prefix/")
-		defer scheduler.Stop()
-		disc := discoverer.NewEtcd(etcd, "/prefix/")
 
 		err := scheduler.Wait(context.Background())
 		require.NoError(t, err)
