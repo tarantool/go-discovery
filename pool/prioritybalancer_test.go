@@ -26,10 +26,11 @@ func TestPriorityBalancer_AddAndGet(t *testing.T) {
 	require.NotNil(t, prBalancer)
 
 	for i := 0; i < 5; i++ {
-		prBalancer.Add(discovery.Instance{
+		err := prBalancer.Add(discovery.Instance{
 			Name: gen(i),
 			Mode: discovery.ModeRO,
 		})
+		require.NoError(t, err)
 	}
 
 	for _, mode := range [...]discovery.Mode{discovery.ModeAny, discovery.ModeRO} {
@@ -50,17 +51,20 @@ func TestPriorityBalancer_AddAndGetDifferentPriorities(t *testing.T) {
 	require.NotNil(t, prBalancer)
 
 	for i := 0; i < 6; i++ {
-		prBalancer.Add(discovery.Instance{Name: gen(i), Mode: discovery.ModeRO,
+		err := prBalancer.Add(discovery.Instance{Name: gen(i), Mode: discovery.ModeRO,
 			Group: strconv.Itoa(i / 2),
 		})
+		require.NoError(t, err)
 	}
 	for i := 6; i < 12; i++ {
-		prBalancer.Add(discovery.Instance{Name: gen(i), Mode: discovery.ModeRW,
+		err := prBalancer.Add(discovery.Instance{Name: gen(i), Mode: discovery.ModeRW,
 			Group: strconv.Itoa(i / 2),
 		})
+		require.NoError(t, err)
 	}
-	prBalancer.Add(discovery.Instance{Name: gen(99), Mode: discovery.ModeAny,
+	err := prBalancer.Add(discovery.Instance{Name: gen(99), Mode: discovery.ModeAny,
 		Group: "100"})
+	require.NoError(t, err)
 
 	// Highest priority for RO is 2 with elements: 4, 5.
 	for i := 4; i < 6; i++ {
@@ -89,9 +93,10 @@ func TestPriorityBalancer_AddAndGetDifferentPrioritiesHigherFirst(t *testing.T) 
 	require.NotNil(t, prBalancer)
 
 	for i := 5; i >= 0; i-- {
-		prBalancer.Add(discovery.Instance{Name: gen(i), Mode: discovery.ModeRO,
+		err := prBalancer.Add(discovery.Instance{Name: gen(i), Mode: discovery.ModeRO,
 			Group: strconv.Itoa(i / 2),
 		})
+		require.NoError(t, err)
 	}
 
 	// Highest priority for RO is 2 with elements: 4, 5.
@@ -107,17 +112,20 @@ func TestPriorityBalancer_Remove(t *testing.T) {
 	require.NotNil(t, prBalancer)
 
 	for i := 0; i < 6; i++ {
-		prBalancer.Add(discovery.Instance{Name: gen(i), Mode: discovery.ModeRO,
+		err := prBalancer.Add(discovery.Instance{Name: gen(i), Mode: discovery.ModeRO,
 			Group: strconv.Itoa(i / 2),
 		})
+		require.NoError(t, err)
 	}
 	for i := 6; i < 12; i++ {
-		prBalancer.Add(discovery.Instance{Name: gen(i), Mode: discovery.ModeRW,
+		err := prBalancer.Add(discovery.Instance{Name: gen(i), Mode: discovery.ModeRW,
 			Group: strconv.Itoa(i / 2),
 		})
+		require.NoError(t, err)
 	}
-	prBalancer.Add(discovery.Instance{Name: gen(99), Mode: discovery.ModeAny,
+	err := prBalancer.Add(discovery.Instance{Name: gen(99), Mode: discovery.ModeAny,
 		Group: "100"})
+	require.NoError(t, err)
 
 	// Highest priority for All is 100 with elements: 99.
 	for i := 0; i < 2; i++ {
@@ -146,9 +154,10 @@ func TestPriorityBalancer_RemoveAndContinue(t *testing.T) {
 	require.NotNil(t, prBalancer)
 
 	for i := 0; i < 8; i++ {
-		prBalancer.Add(discovery.Instance{Name: gen(i), Mode: discovery.ModeRO,
+		err := prBalancer.Add(discovery.Instance{Name: gen(i), Mode: discovery.ModeRO,
 			Group: "0",
 		})
+		require.NoError(t, err)
 	}
 
 	for i := 0; i < 2; i++ {
@@ -163,8 +172,9 @@ func TestPriorityBalancer_RemoveAndContinue(t *testing.T) {
 	assert.True(t, ok)
 	assert.Equal(t, gen(4), name)
 
-	prBalancer.Add(discovery.Instance{Name: gen(8), Mode: discovery.ModeRO,
+	err := prBalancer.Add(discovery.Instance{Name: gen(8), Mode: discovery.ModeRO,
 		Group: "2"})
+	require.NoError(t, err)
 	name, ok = prBalancer.Next(discovery.ModeRO)
 	assert.True(t, ok)
 	assert.Equal(t, gen(8), name)
@@ -183,7 +193,8 @@ func TestPriorityBalancer_AddExisting(t *testing.T) {
 	require.NotNil(t, prBalancer)
 
 	for i := 0; i < 4; i++ {
-		prBalancer.Add(discovery.Instance{Name: gen(i), Mode: discovery.ModeRO, Group: "4"})
+		err := prBalancer.Add(discovery.Instance{Name: gen(i), Mode: discovery.ModeRO, Group: "4"})
+		require.NoError(t, err)
 	}
 
 	for i := 0; i < 4; i++ {
@@ -191,7 +202,8 @@ func TestPriorityBalancer_AddExisting(t *testing.T) {
 		assert.True(t, ok)
 		require.Equal(t, gen(i), name)
 	}
-	prBalancer.Add(discovery.Instance{Name: gen(0), Mode: discovery.ModeRW, Group: "3"})
+	err := prBalancer.Add(discovery.Instance{Name: gen(0), Mode: discovery.ModeRW, Group: "3"})
+	require.NoError(t, err)
 
 	// No 0 elem in RO.
 	for i := 1; i < 4; i++ {
@@ -211,7 +223,9 @@ func TestPriorityBalancer_AddExisting(t *testing.T) {
 	}
 
 	// Append existing item with the same priority, but other mode.
-	prBalancer.Add(discovery.Instance{Name: gen(1), Mode: discovery.ModeRW, Group: "4"})
+	err = prBalancer.Add(discovery.Instance{Name: gen(1), Mode: discovery.ModeRW, Group: "4"})
+	require.NoError(t, err)
+
 	// No 0 and 1 elem in RO.
 	for i := 2; i < 4; i++ {
 		name, ok := prBalancer.Next(discovery.ModeRO)
@@ -238,10 +252,11 @@ func TestPriorityBalancer_AsyncAddAndGet(t *testing.T) {
 		start := i * 1000
 		go func() {
 			for i := start; i < start+1000; i++ {
-				prBalancer.Add(discovery.Instance{
+				err := prBalancer.Add(discovery.Instance{
 					Name:  gen(i),
 					Mode:  discovery.ModeRO,
 					Group: strconv.Itoa(start / 1000)})
+				require.NoError(t, err)
 			}
 			wg.Done()
 		}()
@@ -282,8 +297,18 @@ func TestPriorityBalancer_AsyncRemove(t *testing.T) {
 	require.NotNil(t, prBalancer)
 
 	for i := 0; i < 1000; i++ {
-		prBalancer.Add(discovery.Instance{Name: gen(i), Mode: discovery.ModeRO, Group: "1"})
-		prBalancer.Add(discovery.Instance{Name: gen(i + 1000), Mode: discovery.ModeRW, Group: "0"})
+		err := prBalancer.Add(discovery.Instance{
+			Name:  gen(i),
+			Mode:  discovery.ModeRO,
+			Group: "1",
+		})
+		require.NoError(t, err)
+		err = prBalancer.Add(discovery.Instance{
+			Name:  gen(i + 1000),
+			Mode:  discovery.ModeRW,
+			Group: "0",
+		})
+		require.NoError(t, err)
 	}
 
 	routinesCount := 5
