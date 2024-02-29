@@ -27,10 +27,11 @@ func TestRRBalancer_AddAndGet(t *testing.T) {
 		} else if i == 20 {
 			mode = discovery.ModeRW
 		}
-		rrBalancer.Add(discovery.Instance{
+		err := rrBalancer.Add(discovery.Instance{
 			Name: gen(i),
 			Mode: mode,
 		})
+		require.NoError(t, err)
 	}
 
 	for i := 0; i < 60; i++ {
@@ -55,15 +56,19 @@ func TestRRBalancer_Overwrite(t *testing.T) {
 	require.NotNil(t, rrBalancer)
 
 	for i := 0; i < 5; i++ {
-		rrBalancer.Add(discovery.Instance{Name: strconv.Itoa(i), Mode: discovery.ModeRO})
+		err := rrBalancer.Add(discovery.Instance{Name: strconv.Itoa(i), Mode: discovery.ModeRO})
+		require.NoError(t, err)
 	}
 	for i := 5; i < 10; i++ {
-		rrBalancer.Add(discovery.Instance{Name: strconv.Itoa(i), Mode: discovery.ModeRW})
+		err := rrBalancer.Add(discovery.Instance{Name: strconv.Itoa(i), Mode: discovery.ModeRW})
+		require.NoError(t, err)
 	}
 
 	// Add inst_3-4 as RW. Should be removed from RO.
-	rrBalancer.Add(discovery.Instance{Name: strconv.Itoa(3), Mode: discovery.ModeRW})
-	rrBalancer.Add(discovery.Instance{Name: strconv.Itoa(4), Mode: discovery.ModeRW})
+	err := rrBalancer.Add(discovery.Instance{Name: strconv.Itoa(3), Mode: discovery.ModeRW})
+	require.NoError(t, err)
+	err = rrBalancer.Add(discovery.Instance{Name: strconv.Itoa(4), Mode: discovery.ModeRW})
+	require.NoError(t, err)
 	// RO: 0,1,2 left, 3 & 4 moved to RW.
 	for i := 0; i < 5; i++ {
 		name, ok := rrBalancer.Next(discovery.ModeRO)
@@ -89,12 +94,15 @@ func TestRRBalancer_DontOverwriteExisting(t *testing.T) {
 	require.NotNil(t, rrBalancer)
 
 	for i := 0; i < 5; i++ {
-		rrBalancer.Add(discovery.Instance{Name: strconv.Itoa(i), Mode: discovery.ModeRO})
+		err := rrBalancer.Add(discovery.Instance{Name: strconv.Itoa(i), Mode: discovery.ModeRO})
+		require.NoError(t, err)
 	}
 
 	// Do not overwrite/move existing instances with the same mode.
-	rrBalancer.Add(discovery.Instance{Name: strconv.Itoa(3), Mode: discovery.ModeRO})
-	rrBalancer.Add(discovery.Instance{Name: strconv.Itoa(1), Mode: discovery.ModeRO})
+	err := rrBalancer.Add(discovery.Instance{Name: strconv.Itoa(3), Mode: discovery.ModeRO})
+	require.NoError(t, err)
+	err = rrBalancer.Add(discovery.Instance{Name: strconv.Itoa(1), Mode: discovery.ModeRO})
+	require.NoError(t, err)
 	for i := 0; i < 10; i++ {
 		name, ok := rrBalancer.Next(discovery.ModeRO)
 		assert.True(t, ok)
@@ -114,10 +122,11 @@ func TestRRBalancer_RemovingInstances(t *testing.T) {
 		} else if i == 20 {
 			mode = discovery.ModeRW
 		}
-		rrBalancer.Add(discovery.Instance{
+		err := rrBalancer.Add(discovery.Instance{
 			Name: gen(i),
 			Mode: mode,
 		})
+		require.NoError(t, err)
 	}
 
 	for i := 0; i < 5; i++ {
@@ -172,7 +181,8 @@ func TestRRBalancer_RemovingInstancesIterInProgress(t *testing.T) {
 	require.NotNil(t, rrBalancer)
 
 	for i := 0; i < 10; i++ {
-		rrBalancer.Add(discovery.Instance{Name: strconv.Itoa(i), Mode: discovery.ModeRO})
+		err := rrBalancer.Add(discovery.Instance{Name: strconv.Itoa(i), Mode: discovery.ModeRO})
+		require.NoError(t, err)
 	}
 
 	for i := 0; i < 5; i++ {
@@ -212,10 +222,11 @@ func TestRRBalancer_AsyncGet(t *testing.T) {
 		start := i * 100
 		go func() {
 			for i := start; i < start+100; i++ {
-				rrBalancer.Add(discovery.Instance{
+				err := rrBalancer.Add(discovery.Instance{
 					Name: gen(i),
 					Mode: discovery.ModeRW,
 				})
+				require.NoError(t, err)
 			}
 			wg.Done()
 		}()
@@ -261,8 +272,10 @@ func TestRRBalancer_AsyncRemove(t *testing.T) {
 	gen := func(n int) string { return fmt.Sprintf("inst_%d", n) }
 
 	for i := 0; i < 1000; i++ {
-		rrBalancer.Add(discovery.Instance{Name: gen(i), Mode: discovery.ModeRO})
-		rrBalancer.Add(discovery.Instance{Name: gen(i + 1000), Mode: discovery.ModeRW})
+		err := rrBalancer.Add(discovery.Instance{Name: gen(i), Mode: discovery.ModeRO})
+		require.NoError(t, err)
+		err = rrBalancer.Add(discovery.Instance{Name: gen(i + 1000), Mode: discovery.ModeRW})
+		require.NoError(t, err)
 	}
 
 	names := make(map[string]bool)

@@ -40,7 +40,7 @@ func (b *PriorityBalancer) Remove(instNameToRemove string) {
 }
 
 // Add adds a new instance name to the balancer.
-func (b *PriorityBalancer) Add(instance discovery.Instance) bool {
+func (b *PriorityBalancer) Add(instance discovery.Instance) error {
 	b.mu.Lock()
 	defer b.mu.Unlock()
 
@@ -55,7 +55,7 @@ func (b *PriorityBalancer) Add(instance discovery.Instance) bool {
 	instancePriority := b.priorityFunc(instance)
 	b.instancesByMode[instance.Mode].Push(instance.Name, instancePriority)
 	b.instancesByMode[discovery.ModeAny].Push(instance.Name, instancePriority)
-	return true
+	return nil
 }
 
 // Next returns a next highest priority instance of the specified mode.
