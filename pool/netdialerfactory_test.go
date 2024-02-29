@@ -2,6 +2,7 @@ package pool_test
 
 import (
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -9,6 +10,8 @@ import (
 	"github.com/tarantool/go-discovery/pool"
 	"github.com/tarantool/go-tarantool/v2"
 )
+
+var _ pool.DialerFactory = &pool.NetDialerFactory{}
 
 func TestNetDialerFactory_NewDialer(t *testing.T) {
 	type factoryArgs struct {
@@ -189,17 +192,24 @@ func TestNetDialerFactory_NewDialer(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			opts := tarantool.Opts{
+				Timeout: time.Second,
+			}
+
 			factory := pool.NewNetDialerFactory(tt.factoryArgs.username,
-				tt.factoryArgs.password)
-			got, err := factory.NewDialer(tt.args.instance)
+				tt.factoryArgs.password,
+				opts)
+			got, gotOpts, err := factory.NewDialer(tt.args.instance)
 			if tt.wantErr {
 				assert.Error(t, err)
 				return
 			}
+
 			assert.NoError(t, err)
 			gotNet, ok := got.(*tarantool.NetDialer)
 			require.True(t, ok)
 			assert.Equal(t, tt.want, *gotNet)
+			assert.Equal(t, opts, gotOpts)
 		})
 	}
 }

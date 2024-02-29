@@ -16,21 +16,26 @@ type NetDialerFactory struct {
 	username string
 	// password is a password to use for connection.
 	password string
+	// opts is a connection options to use for a connection.
+	opts tarantool.Opts
 }
 
-// NewNetDialerFactory creates new net dialer factory.
-func NewNetDialerFactory(username, password string) *NetDialerFactory {
+// NewNetDialerFactory creates new net dialer factory for a pair
+// username/password and connection options.
+func NewNetDialerFactory(username, password string, opts tarantool.Opts) *NetDialerFactory {
 	factory := &NetDialerFactory{
 		username: username,
 		password: password,
+		opts:     opts,
 	}
 	return factory
 }
 
-// NewDialer creates new network dialer.
-func (f *NetDialerFactory) NewDialer(instance discovery.Instance) (tarantool.Dialer, error) {
+// NewDialer creates new network dialer and options for it.
+func (f *NetDialerFactory) NewDialer(
+	instance discovery.Instance) (tarantool.Dialer, tarantool.Opts, error) {
 	if len(instance.Endpoints) == 0 {
-		return nil, fmt.Errorf("%s instance URI list is empty", instance.Name)
+		return nil, f.opts, fmt.Errorf("%s instance URI list is empty", instance.Name)
 	}
 
 	// First look for unix-socket URI.
@@ -49,8 +54,8 @@ func (f *NetDialerFactory) NewDialer(instance discovery.Instance) (tarantool.Dia
 			func(endpoint discovery.Endpoint) bool {
 				return endpoint.Transport == discovery.TransportPlain
 			}); endpointIndex == -1 {
-			return nil, fmt.Errorf("%s instance does not have a plain endpoint",
-				instance.Name)
+			return nil, f.opts,
+				fmt.Errorf("%s instance does not have a plain endpoint", instance.Name)
 		}
 	}
 	uri = instance.Endpoints[endpointIndex].URI
@@ -59,5 +64,5 @@ func (f *NetDialerFactory) NewDialer(instance discovery.Instance) (tarantool.Dia
 		Address:  uri,
 		User:     f.username,
 		Password: f.password,
-	}, nil
+	}, f.opts, nil
 }
