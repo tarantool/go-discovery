@@ -14,3 +14,47 @@ Versioning](http://semver.org/spec/v2.0.0.html) except to the first release.
 ### Changed
 
 ### Fixed
+
+## [v0.1.0] - 2024-04-03
+
+The initial release of the library. The main features:
+
+* Fetch Tarantool instances configurations from etcd.
+* Create an update instance configuration events stream due to changes in etcd.
+* Filter configurations with a custom set of filters.
+* Create a pool of connections depending on actual cluster configuration in
+  etcd.
+* All requests from the Go connector `tarantool/go-tarantool` are supported
+  (include `tarantool/go-tarantool/crud` requests).
+
+### Added
+
+* `Instance` type describes an instance configuration.
+* `Mode` enumeration allows to choose an instance mode to execute a request.
+* `filter` subpackage with a set filters to fetch only required instances.
+* `discoverer` subpackage with a set of discoverers to fetch instances
+  configuration.
+  * `Etcd` discoverer allows to fetch instance configuration from a cluster
+    configuration in etcd.
+  * `Filter` discoverer allows to filter a list of instances configurations.
+* `scheduler` subpackage with a set of schedulers.
+  * `Periodic` scheduler allows to schedule events due to a timeout.
+  * `EtcdWatch` scheduler allows to schedule events due to updates in etcd.
+* `subscriber` subpackage with a set of types to subscribe to new update
+  instances configurations events.
+  * `Schedule` subscriber combains scheduler and discoverer to generate update
+    the events stream.
+  * `Filter` subscriber allows to filter an update events stream due to
+    instance configuration.
+* `pool` subpackage with a set of types to create a connection pool.
+  * `NetDialerFactory` creates a connection settings to connect to an instance
+    without TLS from the instance configuration.
+  * `RoundRobinBalancer` helps to send requests from a pool to instances
+    in round-robin.
+  * `PriorityBalancer` helps to send requests from a pool to instances with
+    a higher priority.
+  * `Pool` of connections could be subscribed to a subscriber. It observes an
+    update events stream and establishes connections or removes a connection
+    from pool due to changes.
+  * `DoerAdapter` adapts Pool to tarantool.Doer to send requests into the pool
+    with specified mode.
