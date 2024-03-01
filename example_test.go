@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"time"
 	"sync"
 
 	clientv3 "go.etcd.io/etcd/client/v3"
@@ -77,7 +78,7 @@ func Example_subscriber_Schedule_Etcd() {
 		return
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), etcdTimeout)
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	_, err = etcd.Put(ctx, "foo/config/key", `
 database:
   mode: ro
@@ -197,7 +198,7 @@ func Example_subscriber_Filter() {
 		return
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), etcdTimeout)
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	_, err = etcd.Put(ctx, "foo/config/key", `
 database:
   mode: ro

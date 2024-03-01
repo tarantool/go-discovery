@@ -92,9 +92,6 @@ jobs:
     - name: Add Tarantool master to PATH
       run: echo "${GITHUB_WORKSPACE}/bin" >> $GITHUB_PATH
 
-    - name: Setup etcd
-      uses: ./.github/actions/setup-etcd
-
     - name: Setup golang ${{ matrix.golang }}
       uses: actions/setup-go@v3
       with:
