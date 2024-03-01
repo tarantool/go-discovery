@@ -6,6 +6,9 @@ implemented in Go language according to the [design document][design-document].
 The main example demonstrates how to create a pool of connections based
 on a cluster configuration in etcd.
 
+*NOTE: the public API is not stable and could be changed until release
+v1.0.0.*
+
 ```Go
 package main
 
