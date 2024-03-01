@@ -463,15 +463,15 @@ groups:
         instances:
           zoo:
             iproto:
-              listen:
-              - uri: "foo"
-                params:
-                  transport: "ssl"
+              advertise:
+                client: "foo"
+                peer:
+                  params:
+                    transport: "ssl"
           car:
             iproto:
-              listen:
-              - uri: "zoo"
-              - uri: "bar"
+              advertise:
+                client: "zoo"
 `},
 			Expected: []discovery.Instance{
 				discovery.Instance{
@@ -494,10 +494,6 @@ groups:
 					Endpoints: []discovery.Endpoint{
 						discovery.Endpoint{
 							URI:       "zoo",
-							Transport: discovery.TransportPlain,
-						},
-						discovery.Endpoint{
-							URI:       "bar",
 							Transport: discovery.TransportPlain,
 						},
 					},
@@ -669,14 +665,8 @@ groups:
         instances:
           zoo:
             iproto:
-              listen:
-              - uri: localhost:3011
-              - uri: localhost:3012
-                params:
-                  transport: ssl
-              - uri: localhost:3013
-                params:
-                  transport: plain
+              advertise:
+                client: "localhost:3011"
             roles: [crud]
             roles_cfg:
               tags:
@@ -698,14 +688,6 @@ groups:
 					Endpoints: []discovery.Endpoint{
 						discovery.Endpoint{
 							URI:       "localhost:3011",
-							Transport: discovery.TransportPlain,
-						},
-						discovery.Endpoint{
-							URI:       "localhost:3012",
-							Transport: discovery.TransportSSL,
-						},
-						discovery.Endpoint{
-							URI:       "localhost:3013",
 							Transport: discovery.TransportPlain,
 						},
 					},

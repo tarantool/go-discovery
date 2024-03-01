@@ -140,10 +140,12 @@ func parseInstanceConfig(config *cluster.Config,
 			Mode string
 		}
 		Iproto struct {
-			Listen []struct {
-				URI    string
-				Params struct {
-					Transport string
+			Advertise struct {
+				Client string
+				Peer   struct {
+					Params struct {
+						Transport string
+					}
 				}
 			}
 		}
@@ -178,12 +180,12 @@ func parseInstanceConfig(config *cluster.Config,
 
 	// Collect URI.
 	var endpoints []discovery.Endpoint
-	for _, listen := range parsed.Iproto.Listen {
+	if parsed.Iproto.Advertise.Client != "" {
 		endpoint := discovery.Endpoint{
-			URI:       listen.URI,
+			URI:       parsed.Iproto.Advertise.Client,
 			Transport: discovery.TransportPlain,
 		}
-		if listen.Params.Transport == transportSSL {
+		if parsed.Iproto.Advertise.Peer.Params.Transport == transportSSL {
 			endpoint.Transport = discovery.TransportSSL
 		}
 		endpoints = append(endpoints, endpoint)

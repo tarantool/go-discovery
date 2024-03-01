@@ -46,14 +46,11 @@ groups:
         instances:
           zoo:
             iproto:
-              listen:
-              - uri: localhost:3011
-              - uri: localhost:3012
-                params:
-                  transport: ssl
-              - uri: localhost:3013
-                params:
-                  transport: plain
+              advertise:
+                client: localhost:3011
+                peer:
+                  params:
+                    transport: ssl
             roles: [crud]
             roles_cfg:
               tags:
@@ -98,7 +95,7 @@ groups:
 	// Replicaset: bar
 	// Name: zoo
 	// Mode: ro
-	// Endpoints: [{localhost:3011 plain} {localhost:3012 ssl} {localhost:3013 plain}]
+	// Endpoints: [{localhost:3011 ssl}]
 	// Roles: [crud]
 	// RolesTags: [any bar 3]
 	// AppTags: [foo bar]
