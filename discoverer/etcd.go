@@ -130,7 +130,6 @@ func parseInstanceConfig(config *cluster.Config,
 		failoverManual = "manual"
 		modeRW         = "rw"
 		modeRO         = "ro"
-		transportSSL   = "ssl"
 	)
 	var parsed struct {
 		Replication struct {
@@ -142,11 +141,6 @@ func parseInstanceConfig(config *cluster.Config,
 		Iproto struct {
 			Advertise struct {
 				Client string
-				Peer   struct {
-					Params struct {
-						Transport string
-					}
-				}
 			}
 		}
 		Leader string
@@ -179,18 +173,11 @@ func parseInstanceConfig(config *cluster.Config,
 	// Else Mode = ModeAny.
 
 	// Collect URI.
-	var endpoints []discovery.Endpoint
+	var uri []string
 	if parsed.Iproto.Advertise.Client != "" {
-		endpoint := discovery.Endpoint{
-			URI:       parsed.Iproto.Advertise.Client,
-			Transport: discovery.TransportPlain,
-		}
-		if parsed.Iproto.Advertise.Peer.Params.Transport == transportSSL {
-			endpoint.Transport = discovery.TransportSSL
-		}
-		endpoints = append(endpoints, endpoint)
+		uri = append(uri, parsed.Iproto.Advertise.Client)
 	}
-	instance.Endpoints = endpoints
+	instance.URI = uri
 
 	// Roles already parsed.
 	instance.Roles = parsed.Roles

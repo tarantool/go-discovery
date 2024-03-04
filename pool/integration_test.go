@@ -55,11 +55,7 @@ func makeDialers(servers []string) []tarantool.Dialer {
 func makeInstance(server string) discovery.Instance {
 	return discovery.Instance{
 		Name: server,
-		Endpoints: []discovery.Endpoint{
-			discovery.Endpoint{
-				URI: server,
-			},
-		},
+		URI:  []string{server},
 	}
 }
 
@@ -308,7 +304,7 @@ func TestPool_Observe(t *testing.T) {
 
 	// Update.
 	updateInstance := instances[0]
-	updateInstance.Endpoints = instances[1].Endpoints
+	updateInstance.URI = instances[1].URI
 	updateInstance.Mode = instances[1].Mode
 
 	testPool.Observe([]discovery.Event{
