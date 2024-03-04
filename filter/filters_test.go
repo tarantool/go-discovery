@@ -14,7 +14,6 @@ var _ discovery.Filter = filter.ReplicasetOneOf{}
 var _ discovery.Filter = filter.NameOneOf{}
 var _ discovery.Filter = filter.ModeOneOf{}
 var _ discovery.Filter = filter.URIAnyOf{}
-var _ discovery.Filter = filter.TransportAnyOf{}
 var _ discovery.Filter = filter.RolesContains{}
 var _ discovery.Filter = filter.RolesTagsContains{}
 var _ discovery.Filter = filter.AppTagsContains{}
@@ -188,75 +187,6 @@ func TestFilters(t *testing.T) {
 				},
 			},
 			Filter:   filter.URIAnyOf{[]string{"zoo", "car"}},
-			Expected: true,
-		},
-		{
-			Name:     "transport_one_of_empty_isntance_and_filter",
-			Instance: discovery.Instance{},
-			Filter:   filter.TransportAnyOf{},
-			Expected: false,
-		},
-		{
-			Name: "transport_one_of_empty_filter",
-			Instance: discovery.Instance{
-				Endpoints: []discovery.Endpoint{
-					discovery.Endpoint{
-						Transport: discovery.TransportPlain,
-					},
-				},
-			},
-			Filter:   filter.TransportAnyOf{},
-			Expected: false,
-		},
-		{
-			Name: "transport_one_of_no_match",
-			Instance: discovery.Instance{
-				Endpoints: []discovery.Endpoint{
-					discovery.Endpoint{
-						Transport: discovery.TransportPlain,
-					},
-					discovery.Endpoint{
-						Transport: discovery.TransportSSL,
-					},
-				},
-			},
-			Filter: filter.TransportAnyOf{[]discovery.Transport{
-				discovery.Transport(665),
-				discovery.Transport(667),
-			}},
-			Expected: false,
-		},
-		{
-			Name: "transport_one_of_match",
-			Instance: discovery.Instance{
-				Endpoints: []discovery.Endpoint{
-					discovery.Endpoint{
-						Transport: discovery.TransportPlain,
-					},
-				},
-			},
-			Filter: filter.TransportAnyOf{[]discovery.Transport{
-				discovery.Transport(665),
-				discovery.TransportPlain,
-			}},
-			Expected: true,
-		},
-		{
-			Name: "transport_one_of_match_any",
-			Instance: discovery.Instance{
-				Endpoints: []discovery.Endpoint{
-					discovery.Endpoint{
-						Transport: discovery.TransportPlain,
-					},
-					discovery.Endpoint{
-						Transport: discovery.TransportSSL,
-					},
-				},
-			},
-			Filter: filter.TransportAnyOf{[]discovery.Transport{
-				discovery.Transport(665),
-				discovery.TransportSSL,
-			}},
 			Expected: true,
 		},
 		{
