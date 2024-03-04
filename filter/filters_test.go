@@ -136,56 +136,26 @@ func TestFilters(t *testing.T) {
 			Expected: false,
 		},
 		{
-			Name: "uri_one_of_empty_filter",
-			Instance: discovery.Instance{
-				Endpoints: []discovery.Endpoint{
-					discovery.Endpoint{
-						URI: "foo",
-					},
-				},
-			},
+			Name:     "uri_one_of_empty_filter",
+			Instance: discovery.Instance{URI: []string{"foo"}},
 			Filter:   filter.URIAnyOf{},
 			Expected: false,
 		},
 		{
-			Name: "uri_one_of_no_match",
-			Instance: discovery.Instance{
-				Endpoints: []discovery.Endpoint{
-					discovery.Endpoint{
-						URI: "zoo",
-					},
-					discovery.Endpoint{
-						URI: "car",
-					},
-				},
-			},
+			Name:     "uri_one_of_no_match",
+			Instance: discovery.Instance{URI: []string{"zoo", "car"}},
 			Filter:   filter.URIAnyOf{[]string{"foo", "bar"}},
 			Expected: false,
 		},
 		{
-			Name: "uri_one_of_match",
-			Instance: discovery.Instance{
-				Endpoints: []discovery.Endpoint{
-					discovery.Endpoint{
-						URI: "foo",
-					},
-				},
-			},
+			Name:     "uri_one_of_match",
+			Instance: discovery.Instance{URI: []string{"foo"}},
 			Filter:   filter.URIAnyOf{[]string{"foo", "bar"}},
 			Expected: true,
 		},
 		{
-			Name: "uri_one_of_match_any",
-			Instance: discovery.Instance{
-				Endpoints: []discovery.Endpoint{
-					discovery.Endpoint{
-						URI: "foo",
-					},
-					discovery.Endpoint{
-						URI: "car",
-					},
-				},
-			},
+			Name:     "uri_one_of_match_any",
+			Instance: discovery.Instance{URI: []string{"foo", "car"}},
 			Filter:   filter.URIAnyOf{[]string{"zoo", "car"}},
 			Expected: true,
 		},

@@ -77,7 +77,7 @@ groups:
 		fmt.Println("Replicaset:", instance.Replicaset)
 		fmt.Println("Name:", instance.Name)
 		fmt.Println("Mode:", instance.Mode.String())
-		fmt.Println("Endpoints:", instance.Endpoints)
+		fmt.Println("URI:", instance.URI)
 		fmt.Println("Roles:", instance.Roles)
 		fmt.Println("RolesTags:", instance.RolesTags)
 		fmt.Println("AppTags:", instance.AppTags)
@@ -95,7 +95,7 @@ groups:
 	// Replicaset: bar
 	// Name: zoo
 	// Mode: ro
-	// Endpoints: [{localhost:3011 ssl}]
+	// URI: [localhost:3011]
 	// Roles: [crud]
 	// RolesTags: [any bar 3]
 	// AppTags: [foo bar]
