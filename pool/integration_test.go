@@ -425,11 +425,23 @@ func TestPool_choose_instance_by_a_balancer(t *testing.T) {
 			// Execute a request on each instance, the pool ignores instance
 			// modes and just does what the Balancer says.
 			for _, server := range servers {
-				retBalancer.Ret <- server
-				data, err := testPool.Do(eval, mode).Get()
+				timeout := time.After(5 * time.Second)
+				for {
+					select {
+					case <-timeout:
+						t.Fatalf("timeout")
+					default:
+					}
 
-				require.NoError(t, err)
-				assert.Equal(t, []interface{}{server}, data)
+					retBalancer.Ret <- server
+					data, err := testPool.Do(eval, mode).Get()
+					if errors.Is(err, pool.ErrNoConnectedInstances) {
+						continue
+					}
+					require.NoError(t, err)
+					assert.Equal(t, []interface{}{server}, data)
+					break
+				}
 			}
 		})
 	}
