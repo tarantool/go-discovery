@@ -43,7 +43,7 @@ func (o *exampleObserver) Observe(events []discovery.Event, err error) {
 			fmt.Println("Replicaset:", event.New.Replicaset)
 			fmt.Println("Name:", event.New.Name)
 			fmt.Println("Mode:", event.New.Mode.String())
-			fmt.Println("Endpoints:", event.New.Endpoints)
+			fmt.Println("URI:", event.New.URI)
 			fmt.Println("Roles:", event.New.Roles)
 			fmt.Println("RolesTags:", event.New.RolesTags)
 			fmt.Println("AppTags:", event.New.AppTags)
@@ -122,7 +122,7 @@ groups:
 	// Replicaset: bar
 	// Name: zoo
 	// Mode: ro
-	// Endpoints: [{localhost:3011 plain}]
+	// URI: [localhost:3011]
 	// Roles: [crud]
 	// RolesTags: [any bar 3]
 	// AppTags: [foo bar]
@@ -267,7 +267,7 @@ groups:
 	// Replicaset: bar
 	// Name: zoo
 	// Mode: ro
-	// Endpoints: [{localhost:3011 plain}]
+	// URI: [localhost:3011]
 	// Roles: [crud]
 	// RolesTags: [any bar 3]
 	// AppTags: [foo bar]

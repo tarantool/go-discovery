@@ -10,8 +10,8 @@ type Instance struct {
 	Name string
 	// Mode is a current mode of the instance.
 	Mode Mode
-	// Endpoints is a set of available endpoints to connect to the instance.
-	Endpoints []Endpoint
+	// URI is a set of available URIs to connect to the instance.
+	URI []string
 	// Roles is a set of the instance's roles.
 	Roles []string
 	// RolesTags is a set of string tags configured for roles by the
