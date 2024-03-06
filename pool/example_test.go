@@ -7,6 +7,7 @@ import (
 	"github.com/tarantool/go-tarantool/v2"
 
 	"github.com/tarantool/go-discovery"
+	"github.com/tarantool/go-discovery/dial"
 	"github.com/tarantool/go-discovery/pool"
 )
 
@@ -15,7 +16,7 @@ import (
 // strategy.
 func ExampleRoundRobinBalancer() {
 	balancer := pool.NewRoundRobinBalancer()
-	dialerFactory := pool.NewNetDialerFactory("user", "pass", tarantool.Opts{
+	dialerFactory := dial.NewNetDialerFactory("user", "pass", tarantool.Opts{
 		Timeout: 5 * time.Second,
 	})
 	examplePool, err := pool.NewPool(dialerFactory, balancer)
@@ -51,7 +52,7 @@ func ExamplePriorityBalancer() {
 		// are not available for a mode.
 		return 0
 	})
-	dialerFactory := pool.NewNetDialerFactory("user", "pass", tarantool.Opts{
+	dialerFactory := dial.NewNetDialerFactory("user", "pass", tarantool.Opts{
 		Timeout: 5 * time.Second,
 	})
 
@@ -73,7 +74,7 @@ func ExamplePriorityBalancer() {
 // tarantool.Doer interface and send request with specific mode to the pool.
 func ExampleDoerAdapter() {
 	balancer := pool.NewRoundRobinBalancer()
-	dialerFactory := pool.NewNetDialerFactory("user", "pass", tarantool.Opts{
+	dialerFactory := dial.NewNetDialerFactory("user", "pass", tarantool.Opts{
 		Timeout: 5 * time.Second,
 	})
 	examplePool, err := pool.NewPool(dialerFactory, balancer)

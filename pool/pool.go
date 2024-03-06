@@ -50,7 +50,7 @@ type Pool struct {
 	balancer Balancer
 	// factory is a DialerFactory used to create connection settings to
 	// instances.
-	factory DialerFactory
+	factory discovery.DialerFactory
 	// pool is ttpool.ConnectionPool object that used to handle connections
 	// and execute requests.
 	pool atomic.Pointer[ttpool.ConnectionPool]
@@ -63,7 +63,7 @@ type Pool struct {
 // NewPool creates a Pool object. It is required to subscribe the created pool
 // to any discovery.Subscriber to start receiving new instances configurations
 // and create actual connections to instances.
-func NewPool(factory DialerFactory, balancer Balancer) (*Pool, error) {
+func NewPool(factory discovery.DialerFactory, balancer Balancer) (*Pool, error) {
 	if factory == nil {
 		return nil, ErrMissingDialerFactory
 	}

@@ -1,4 +1,4 @@
-package pool_test
+package dial_test
 
 import (
 	"testing"
@@ -6,12 +6,13 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"github.com/tarantool/go-discovery"
-	"github.com/tarantool/go-discovery/pool"
 	"github.com/tarantool/go-tarantool/v2"
+
+	"github.com/tarantool/go-discovery"
+	"github.com/tarantool/go-discovery/dial"
 )
 
-var _ pool.DialerFactory = &pool.NetDialerFactory{}
+var _ discovery.DialerFactory = &dial.NetDialerFactory{}
 
 func TestNetDialerFactory_NewDialer(t *testing.T) {
 	type factoryArgs struct {
@@ -112,7 +113,7 @@ func TestNetDialerFactory_NewDialer(t *testing.T) {
 				Timeout: time.Second,
 			}
 
-			factory := pool.NewNetDialerFactory(tt.factoryArgs.username,
+			factory := dial.NewNetDialerFactory(tt.factoryArgs.username,
 				tt.factoryArgs.password,
 				opts)
 			got, gotOpts, err := factory.NewDialer(tt.args.instance)
