@@ -13,6 +13,9 @@ Versioning](http://semver.org/spec/v2.0.0.html) except to the first release.
 
 ### Changed
 
+* Move `DialerFactory` interface to the main package (#4).
+  Move `NetDialerFactory` to the `dial` package.
+
 ### Fixed
 
 ## [v0.1.0] - 2024-04-03

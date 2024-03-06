@@ -15,6 +15,7 @@ import (
 	"github.com/tarantool/go-tarantool/v2/test_helpers"
 
 	"github.com/tarantool/go-discovery"
+	"github.com/tarantool/go-discovery/dial"
 	"github.com/tarantool/go-discovery/pool"
 
 	"golang.org/x/exp/slices"
@@ -230,7 +231,7 @@ func TestPool_simple(t *testing.T) {
 	err := test_helpers.SetClusterRO(dialers, connOpts, roles)
 	require.NoError(t, err)
 
-	factory := pool.NewNetDialerFactory(user, pass, connOpts)
+	factory := dial.NewNetDialerFactory(user, pass, connOpts)
 	balancer := pool.NewRoundRobinBalancer()
 	testPool, err := pool.NewPool(factory, balancer)
 	require.NotNil(t, testPool)
@@ -268,7 +269,7 @@ func TestPool_Observe(t *testing.T) {
 	err := test_helpers.SetClusterRO(dialers, connOpts, roles)
 	require.NoError(t, err)
 
-	factory := pool.NewNetDialerFactory(user, pass, connOpts)
+	factory := dial.NewNetDialerFactory(user, pass, connOpts)
 	balancer := newHoldInstancesMockBalancer(newRetMockBalancer())
 	testPool, err := pool.NewPool(factory, balancer)
 	require.NotNil(t, testPool)
@@ -329,7 +330,7 @@ func TestPool_stop_and_start_instances(t *testing.T) {
 	err := test_helpers.SetClusterRO(dialers, connOpts, roles)
 	require.NoError(t, err)
 
-	factory := pool.NewNetDialerFactory(user, pass, connOpts)
+	factory := dial.NewNetDialerFactory(user, pass, connOpts)
 	balancer := newHoldInstancesMockBalancer(newRetMockBalancer())
 	testPool, err := pool.NewPool(factory, balancer)
 	require.NotNil(t, testPool)
@@ -378,7 +379,7 @@ func TestPool_choose_instance_by_a_balancer(t *testing.T) {
 	err := test_helpers.SetClusterRO(dialers, connOpts, roles)
 	require.NoError(t, err)
 
-	factory := pool.NewNetDialerFactory(user, pass, connOpts)
+	factory := dial.NewNetDialerFactory(user, pass, connOpts)
 	retBalancer := newRetMockBalancer()
 	balancer := newHoldInstancesMockBalancer(retBalancer)
 	testPool, err := pool.NewPool(factory, balancer)
@@ -469,7 +470,7 @@ func TestPool_balancers_concurrent(t *testing.T) {
 			return 0
 		})},
 	}
-	factory := pool.NewNetDialerFactory(user, pass, connOpts)
+	factory := dial.NewNetDialerFactory(user, pass, connOpts)
 
 	for _, tc := range cases {
 		t.Run(tc.Name, func(t *testing.T) {

@@ -1,7 +1,6 @@
-package pool
+package discovery
 
 import (
-	"github.com/tarantool/go-discovery"
 	"github.com/tarantool/go-tarantool/v2"
 )
 
@@ -10,5 +9,5 @@ import (
 type DialerFactory interface {
 	// NewDialer creates a new tarantool connection dialer and connection
 	// options.
-	NewDialer(instance discovery.Instance) (tarantool.Dialer, tarantool.Opts, error)
+	NewDialer(instance Instance) (tarantool.Dialer, tarantool.Opts, error)
 }
