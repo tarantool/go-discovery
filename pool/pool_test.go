@@ -66,7 +66,7 @@ func TestNewPool_missed_factory(t *testing.T) {
 
 func TestNewPool_missed_balancer(t *testing.T) {
 	var dummyFactory struct {
-		pool.DialerFactory
+		discovery.DialerFactory
 	}
 
 	testPool, err := pool.NewPool(dummyFactory, nil)
@@ -79,7 +79,7 @@ func TestPoolDo_unsubscribed(t *testing.T) {
 		pool.Balancer
 	}
 	var dummyFactory struct {
-		pool.DialerFactory
+		discovery.DialerFactory
 	}
 	var dummyRequest struct {
 		tarantool.Request
@@ -106,7 +106,7 @@ func TestPoolDo_unsubscribed(t *testing.T) {
 
 func TestPoolDo_no_instances(t *testing.T) {
 	var dummyFactory struct {
-		pool.DialerFactory
+		discovery.DialerFactory
 	}
 	var dummyRequest struct {
 		tarantool.Request
@@ -138,7 +138,7 @@ func TestPoolDo_no_instances(t *testing.T) {
 
 func TestPoolDo_no_instances_resubscribe(t *testing.T) {
 	var dummyFactory struct {
-		pool.DialerFactory
+		discovery.DialerFactory
 	}
 	var dummyRequest struct {
 		tarantool.Request
