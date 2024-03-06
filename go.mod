@@ -4,7 +4,7 @@ go 1.20
 
 require (
 	github.com/stretchr/testify v1.8.4
-	github.com/tarantool/go-tarantool/v2 v2.0.1-0.20240229135142-c070b26c8853
+	github.com/tarantool/go-tarantool/v2 v2.1.0
 	github.com/tarantool/tt/lib/cluster v0.0.0-20240226063114-58f1f7712c6f
 	go.etcd.io/etcd/client/v3 v3.5.12
 	go.etcd.io/etcd/tests/v3 v3.5.12
