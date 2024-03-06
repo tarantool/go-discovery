@@ -12,6 +12,7 @@ import (
 	"go.etcd.io/etcd/tests/v3/integration"
 
 	"github.com/tarantool/go-discovery"
+	"github.com/tarantool/go-discovery/dial"
 	"github.com/tarantool/go-discovery/discoverer"
 	"github.com/tarantool/go-discovery/filter"
 	"github.com/tarantool/go-discovery/scheduler"
@@ -285,4 +286,54 @@ groups:
 			Mode:       discovery.ModeRW,
 		},
 	}, instances)
+}
+
+func TestDiscoverer_Connectable(t *testing.T) {
+	defer stopTarantool(startTarantool(t))
+
+	cluster := integration.NewLazyCluster()
+	defer cluster.Terminate()
+
+	etcd, err := clientv3.New(clientv3.Config{
+		Endpoints: cluster.EndpointsV3(),
+	})
+	require.NoError(t, err)
+	require.NotNil(t, etcd)
+	defer etcd.Close()
+
+	_, err = etcd.Put(context.Background(), "/prefix/config/foo", `
+groups:
+  foo:
+    replicasets:
+      bar:
+        instances:
+          zoo:
+            iproto: 
+              advertise:
+                client: 127.0.0.1:3013
+  zoo:
+    replicasets:
+      any:
+        instances:
+          foo: {}
+`)
+	require.NoError(t, err)
+
+	factory := dial.NewNetDialerFactory(ttUsername, ttPassword, opts)
+
+	disc := discoverer.NewConnectable(factory,
+		discoverer.NewEtcd(etcd, "/prefix"))
+
+	inst, err := disc.Discovery(context.Background())
+	assert.NoError(t, err)
+
+	assert.NotNil(t, inst)
+	assert.Equal(t, 1, len(inst))
+	assert.Equal(t, discovery.Instance{
+		Group:      "foo",
+		Replicaset: "bar",
+		Name:       "zoo",
+		Mode:       discovery.ModeRW,
+		URI:        []string{"127.0.0.1:3013"},
+	}, inst[0])
 }

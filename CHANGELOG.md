@@ -11,6 +11,9 @@ Versioning](http://semver.org/spec/v2.0.0.html) except to the first release.
 
 ### Added
 
+* `Connectable` discoverer (#4). It returns a list of nodes from the
+  inner discoverer that are available for connection.
+
 ### Changed
 
 * Move `DialerFactory` interface to the main package (#4).

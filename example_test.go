@@ -498,3 +498,101 @@ func Example_subscriber_Filter_Etcd_canceled() {
 	// Subscribe error: context canceled
 	// Done.
 }
+
+func Example_discoverer_Connectable() {
+	// Start test Tarantool instance.
+	ttInstance, err := exampleStartTarantool("127.0.0.1:3013")
+	if err != nil {
+		fmt.Println("Failed to start Tarantool:", err)
+		return
+	}
+	defer exampleStopTarantool(ttInstance)
+
+	// Start a test etcd cluster and connect with a client to it.
+	cluster := integration.NewLazyCluster()
+	defer cluster.Terminate()
+
+	etcd, err := clientv3.New(clientv3.Config{
+		Endpoints: cluster.EndpointsV3(),
+	})
+	if err != nil {
+		fmt.Println("Unable to start etcd client:", err)
+		return
+	}
+	defer etcd.Close()
+
+	// And publish a cluster configuration to it.
+	_, err = etcd.Put(context.Background(), "/prefix/config/all", `
+groups:
+  foo:
+    replicasets:
+      bar:
+        instances:
+          instance1:
+            iproto:
+              advertise:
+                client: 127.0.0.1:3013
+            roles: [crud]
+            roles_cfg:
+              tags:
+              - any
+              - bar
+              - 3
+            app:
+              cfg:
+                tags:
+                - foo
+                - bar
+          instance2:
+            iproto:
+              advertise:
+                client: 127.0.0.1:3014
+          instance3:
+            iproto:
+              advertise:
+                client: 127.0.0.1:3015
+`)
+
+	if err != nil {
+		fmt.Println("Failed to publish cluster configuration error:", err)
+		return
+	}
+
+	// Create a net dialer factory.
+	factory := dial.NewNetDialerFactory("testuser", "testpass",
+		tarantool.Opts{Timeout: 5 * time.Second})
+
+	// Create a Connectable discoverer based on the Etcd discoverer.
+	disc := discoverer.NewConnectable(factory,
+		discoverer.NewEtcd(etcd, "/prefix"))
+
+	// Get a list of connectable instances.
+	inst, err := disc.Discovery(context.Background())
+	if err != nil {
+		fmt.Println("Failed to discover connectable instances:", err)
+		return
+	}
+
+	for _, instance := range inst {
+		fmt.Println("Instance found")
+		fmt.Println("Name:", instance.Name)
+		fmt.Println("Mode:", instance.Mode)
+		fmt.Println("URI:", instance.URI)
+		fmt.Println("Roles:", instance.Roles)
+		fmt.Println("AppTags:", instance.AppTags)
+		fmt.Println("Group:", instance.Group)
+		fmt.Println("Replicaset:", instance.Replicaset)
+	}
+	fmt.Println("Done.")
+
+	// Output:
+	// Instance found
+	// Name: instance1
+	// Mode: rw
+	// URI: [127.0.0.1:3013]
+	// Roles: [crud]
+	// AppTags: [foo bar]
+	// Group: foo
+	// Replicaset: bar
+	// Done.
+}
