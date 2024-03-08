@@ -12,19 +12,6 @@ import (
 
 var _ discovery.Discoverer = discoverer.NewFilter(nil)
 
-type mockDiscoverer struct {
-	instances []discovery.Instance
-}
-
-func (d *mockDiscoverer) Discovery(ctx context.Context) ([]discovery.Instance, error) {
-	select {
-	case <-ctx.Done():
-		return nil, ctx.Err()
-	default:
-		return d.instances, nil
-	}
-}
-
 func TestFilter_Discovery(t *testing.T) {
 	instances := []discovery.Instance{
 		{
