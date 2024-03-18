@@ -3,6 +3,7 @@ package discovery_test
 import (
 	"context"
 	"sync"
+	"sync/atomic"
 	"testing"
 	"time"
 
@@ -16,6 +17,7 @@ import (
 	"github.com/tarantool/go-discovery/discoverer"
 	"github.com/tarantool/go-discovery/filter"
 	"github.com/tarantool/go-discovery/scheduler"
+	"github.com/tarantool/go-discovery/subscriber"
 	"github.com/tarantool/go-tarantool/v2"
 	"github.com/tarantool/go-tarantool/v2/test_helpers"
 )
@@ -336,4 +338,115 @@ groups:
 		Mode:       discovery.ModeRW,
 		URI:        []string{"127.0.0.1:3013"},
 	}, inst[0])
+}
+
+type mockObserver struct {
+	eventCnt     atomic.Int32
+	recentEvents atomic.Pointer[[]discovery.Event]
+
+	errCnt    atomic.Int32
+	recentErr error
+
+	wgEvent sync.WaitGroup
+}
+
+func newMockObserver() *mockObserver {
+	obs := &mockObserver{}
+	obs.recentEvents.Store(&[]discovery.Event{})
+	obs.wgEvent = sync.WaitGroup{}
+	return obs
+}
+
+func (o *mockObserver) Observe(events []discovery.Event, err error) {
+	if len(events) > 0 || err == nil {
+		o.eventCnt.Add(1)
+		o.recentEvents.Store(&events)
+		o.wgEvent.Done()
+	}
+	if err != nil {
+		o.errCnt.Add(1)
+		o.recentErr = err
+	}
+}
+
+func TestSubscriber_Connectable(t *testing.T) {
+	defer stopTarantool(startTarantool(t))
+
+	cluster := integration.NewLazyCluster()
+	defer cluster.Terminate()
+
+	etcd, err := clientv3.New(clientv3.Config{
+		Endpoints: cluster.EndpointsV3(),
+	})
+	require.NoError(t, err)
+	require.NotNil(t, etcd)
+	defer etcd.Close()
+
+	connectable := subscriber.NewConnectable(
+		dial.NewNetDialerFactory(ttUsername, ttPassword, opts),
+		subscriber.NewSchedule(scheduler.NewEtcdWatch(etcd, "foo"),
+			discoverer.NewEtcd(etcd, "foo")))
+
+	obs := newMockObserver()
+	obs.wgEvent.Add(1)
+
+	err = connectable.Subscribe(context.Background(), obs)
+	require.NoError(t, err)
+	defer connectable.Unsubscribe(obs)
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	_, err = etcd.Put(ctx, "foo/config/key", `
+groups:
+  foo:
+    replicasets:
+      bar:
+        instances:
+          zoo:
+            iproto: 
+              advertise:
+                client: 127.0.0.1:3013
+  zoo:
+    replicasets:
+      any:
+        instances:
+          foo: {}
+`)
+	cancel()
+	require.NoError(t, err)
+
+	obs.wgEvent.Wait()
+
+	assert.Equal(t, int32(1), obs.eventCnt.Load())
+	assert.Equal(t, []discovery.Event{
+		{
+			Type: discovery.EventTypeAdd,
+			New: discovery.Instance{
+				Group:      "foo",
+				Replicaset: "bar",
+				Name:       "zoo",
+				Mode:       discovery.ModeRW,
+				URI:        []string{"127.0.0.1:3013"},
+			},
+		},
+	}, *obs.recentEvents.Load())
+
+	obs.wgEvent.Add(1)
+	connectable.Unsubscribe(obs)
+
+	assert.Equal(t, int32(2), obs.eventCnt.Load())
+	assert.Equal(t, []discovery.Event{
+		{
+			Type: discovery.EventTypeRemove,
+			Old: discovery.Instance{
+				Group:      "foo",
+				Replicaset: "bar",
+				Name:       "zoo",
+				Mode:       discovery.ModeRW,
+				URI:        []string{"127.0.0.1:3013"},
+			},
+		},
+	}, *obs.recentEvents.Load())
+
+	assert.Equal(t, int32(1), obs.errCnt.Load())
+	assert.Equal(t, discovery.ErrUnsubscribe, obs.recentErr)
 }
