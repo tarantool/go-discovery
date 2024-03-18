@@ -219,22 +219,29 @@ func newExampleObserver() *exampleObserver {
 }
 
 func (o *exampleObserver) Observe(events []discovery.Event, err error) {
-	if err != nil {
-		fmt.Println("Error from the observer:", err)
-	} else {
+	if len(events) > 0 || err == nil {
 		fmt.Println("An event found.")
 		for _, event := range events {
+			instance := event.New
+			if event.Type == discovery.EventTypeRemove {
+				instance = event.Old
+			}
+
 			fmt.Println("Type:", event.Type)
-			fmt.Println("Group:", event.New.Group)
-			fmt.Println("Replicaset:", event.New.Replicaset)
-			fmt.Println("Name:", event.New.Name)
-			fmt.Println("Mode:", event.New.Mode.String())
-			fmt.Println("URI:", event.New.URI)
-			fmt.Println("Roles:", event.New.Roles)
-			fmt.Println("RolesTags:", event.New.RolesTags)
-			fmt.Println("AppTags:", event.New.AppTags)
+			fmt.Println("Group:", instance.Group)
+			fmt.Println("Replicaset:", instance.Replicaset)
+			fmt.Println("Name:", instance.Name)
+			fmt.Println("Mode:", instance.Mode.String())
+			fmt.Println("URI:", instance.URI)
+			fmt.Println("Roles:", instance.Roles)
+			fmt.Println("RolesTags:", instance.RolesTags)
+			fmt.Println("AppTags:", instance.AppTags)
 		}
 		o.wgEvent.Done()
+	}
+
+	if err != nil {
+		fmt.Println("Error from the observer:", err)
 	}
 }
 
@@ -660,7 +667,7 @@ func Example_observer_Accumulator() {
 
 	accumulator.Observe(events, nil)
 
-	obs.wgEvent.Wait()
+	accumulator.Observe(nil, fmt.Errorf("done"))
 	fmt.Println("Done.")
 
 	// Output:
@@ -674,5 +681,115 @@ func Example_observer_Accumulator() {
 	// Roles: []
 	// RolesTags: []
 	// AppTags: []
+	// Error from the observer: done
+	// Done.
+}
+
+func Example_subscriber_Connectable() {
+	// Start test Tarantool instance.
+	ttInstance, err := exampleStartTarantool("127.0.0.1:3013")
+	if err != nil {
+		fmt.Println("Failed to start Tarantool:", err)
+		return
+	}
+	defer exampleStopTarantool(ttInstance)
+
+	cluster := integration.NewLazyCluster()
+	defer cluster.Terminate()
+
+	etcd, err := clientv3.New(clientv3.Config{
+		Endpoints: cluster.EndpointsV3(),
+	})
+	if err != nil {
+		fmt.Println("Unable to start etcd client:", err)
+		return
+	}
+	defer etcd.Close()
+
+	// Create a net dialer factory.
+	factory := dial.NewNetDialerFactory("testuser", "testpass",
+		tarantool.Opts{Timeout: 5 * time.Second})
+
+	// Create a Connectable subscriber based on the Etcd subscriber.
+	connectable := subscriber.NewConnectable(factory,
+		subscriber.NewSchedule(scheduler.NewEtcdWatch(etcd, "foo"),
+			discoverer.NewEtcd(etcd, "foo")))
+
+	obs := newExampleObserver()
+	obs.wgEvent.Add(1)
+
+	err = connectable.Subscribe(context.Background(), obs)
+	if err != nil {
+		fmt.Println("Subscribe error:", err)
+		return
+	}
+	defer connectable.Unsubscribe(obs)
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	_, err = etcd.Put(ctx, "foo/config/key", `
+groups:
+  foo:
+    replicasets:
+      bar:
+        instances:
+          instance1:
+            iproto:
+              advertise:
+                client: 127.0.0.1:3013
+            roles: [crud]
+            roles_cfg:
+              tags:
+              - any
+              - bar
+              - 3
+            app:
+              cfg:
+                tags:
+                - foo
+                - bar
+          instance2:
+            iproto:
+              advertise:
+                client: 127.0.0.1:3014
+          instance3:
+            iproto:
+              advertise:
+                client: 127.0.0.1:3015
+`)
+
+	if err != nil {
+		fmt.Println("Failed to publish cluster configuration error:", err)
+		return
+	}
+
+	obs.wgEvent.Wait()
+	obs.wgEvent.Add(1)
+	connectable.Unsubscribe(obs)
+
+	fmt.Println("Done.")
+
+	// Output:
+	// An event found.
+	// Type: add
+	// Group: foo
+	// Replicaset: bar
+	// Name: instance1
+	// Mode: rw
+	// URI: [127.0.0.1:3013]
+	// Roles: [crud]
+	// RolesTags: [any bar 3]
+	// AppTags: [foo bar]
+	// An event found.
+	// Type: remove
+	// Group: foo
+	// Replicaset: bar
+	// Name: instance1
+	// Mode: rw
+	// URI: [127.0.0.1:3013]
+	// Roles: [crud]
+	// RolesTags: [any bar 3]
+	// AppTags: [foo bar]
+	// Error from the observer: unsubscribed
 	// Done.
 }
