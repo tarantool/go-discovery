@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"sync"
-	"sync/atomic"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -14,58 +13,6 @@ import (
 )
 
 var _ discovery.Subscriber = subscriber.NewFilter(nil, nil)
-
-type mockSubscriber struct {
-	subCnt   atomic.Int32
-	unsubCnt atomic.Int32
-	state    chan discovery.Observer
-
-	eventsReturn []discovery.Event
-}
-
-func newMockSubscriber() *mockSubscriber {
-	state := make(chan discovery.Observer, 1)
-	state <- nil
-
-	return &mockSubscriber{
-		state: state,
-	}
-}
-
-func (s *mockSubscriber) Subscribe(ctx context.Context,
-	observer discovery.Observer) error {
-	select {
-	case <-ctx.Done():
-		return ctx.Err()
-	default:
-	}
-
-	state := <-s.state
-	if state != nil {
-		s.state <- state
-		return subscriber.ErrSubscriptionExists
-	}
-	state = observer
-	s.state <- state
-
-	s.subCnt.Add(1)
-
-	if s.eventsReturn != nil {
-		observer.Observe(s.eventsReturn, nil)
-	}
-	return nil
-}
-
-func (s *mockSubscriber) Unsubscribe(observer discovery.Observer) {
-	state := <-s.state
-	if state == observer && observer != nil {
-		s.unsubCnt.Add(1)
-		observer.Observe(nil, discovery.ErrUnsubscribe)
-
-		state = nil
-	}
-	s.state <- state
-}
 
 func TestNewFilter_NilSubscriber(t *testing.T) {
 	filter := subscriber.NewFilter(nil, nil)
