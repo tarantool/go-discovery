@@ -15,6 +15,9 @@ Versioning](http://semver.org/spec/v2.0.0.html) except to the first release.
   inner discoverer that are available for connection.
 * `Accumulator` observer (#9). It accumulates events and sends them by batches.
   While one batch is being sent, the other is accumulating.
+* `Connectable` subscriber (#9). It filters the stream of events
+  from the inner Subscriber and isolates from it only nodes available
+  for connection.
 
 ### Changed
 

@@ -16,24 +16,33 @@ type mockObserver struct {
 	errCnt    atomic.Int32
 	recentErr error
 
-	errWg sync.WaitGroup
+	needCountEvents bool
+	eventWg         sync.WaitGroup
+	errWg           sync.WaitGroup
 }
 
 func newMockObserver() *mockObserver {
 	obs := &mockObserver{}
 	obs.recentEvents.Store(&[]discovery.Event{})
+	obs.eventWg.Add(1)
 	obs.errWg.Add(1)
 	return obs
 }
 
 func (o *mockObserver) Observe(events []discovery.Event, err error) {
+	if len(events) > 0 || err == nil {
+		o.eventCnt.Add(1)
+		o.recentEvents.Store(&events)
+		if o.needCountEvents {
+			for range events {
+				o.eventWg.Done()
+			}
+		}
+	}
 	if err != nil {
 		o.errCnt.Add(1)
 		o.recentErr = err
 		o.errWg.Done()
-	} else {
-		o.eventCnt.Add(1)
-		o.recentEvents.Store(&events)
 	}
 }
 
@@ -41,7 +50,9 @@ type mockSubscriber struct {
 	subCnt   atomic.Int32
 	unsubCnt atomic.Int32
 	state    chan discovery.Observer
+	stop     chan struct{}
 
+	eventWait    chan struct{}
 	eventsReturn []discovery.Event
 }
 
@@ -50,7 +61,9 @@ func newMockSubscriber() *mockSubscriber {
 	state <- nil
 
 	return &mockSubscriber{
-		state: state,
+		state:     state,
+		eventWait: make(chan struct{}, 1),
+		stop:      make(chan struct{}, 1),
 	}
 }
 
@@ -72,9 +85,30 @@ func (s *mockSubscriber) Subscribe(ctx context.Context,
 
 	s.subCnt.Add(1)
 
+	s.eventWait <- struct{}{}
 	if s.eventsReturn != nil {
 		observer.Observe(s.eventsReturn, nil)
 	}
+
+	go func() {
+		for {
+			select {
+			case <-s.stop:
+				return
+			case <-ctx.Done():
+				return
+			case s.eventWait <- struct{}{}:
+				select {
+				case <-s.stop:
+					return
+				default:
+				}
+				if s.eventsReturn != nil {
+					observer.Observe(s.eventsReturn, nil)
+				}
+			}
+		}
+	}()
 	return nil
 }
 
@@ -85,6 +119,8 @@ func (s *mockSubscriber) Unsubscribe(observer discovery.Observer) {
 		observer.Observe(nil, discovery.ErrUnsubscribe)
 
 		state = nil
+		s.stop <- struct{}{}
 	}
 	s.state <- state
+	<-s.eventWait
 }
