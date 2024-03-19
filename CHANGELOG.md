@@ -21,6 +21,9 @@ Versioning](http://semver.org/spec/v2.0.0.html) except to the first release.
 
 ### Fixed
 
+* An invalid instance mode in the pool (`ModeRO` instead of `ModeRW` and
+  vice versa) (#9).
+
 ## [v0.1.0] - 2024-04-03
 
 The initial release of the library. The main features:
