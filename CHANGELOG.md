@@ -13,6 +13,8 @@ Versioning](http://semver.org/spec/v2.0.0.html) except to the first release.
 
 * `Connectable` discoverer (#4). It returns a list of nodes from the
   inner discoverer that are available for connection.
+* `Accumulator` observer (#9). It accumulates events and sends them by batches.
+  While one batch is being sent, the other is accumulating.
 
 ### Changed
 

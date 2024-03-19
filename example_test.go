@@ -19,6 +19,7 @@ import (
 	"github.com/tarantool/go-discovery/dial"
 	"github.com/tarantool/go-discovery/discoverer"
 	"github.com/tarantool/go-discovery/filter"
+	"github.com/tarantool/go-discovery/observer"
 	"github.com/tarantool/go-discovery/pool"
 	"github.com/tarantool/go-discovery/scheduler"
 	"github.com/tarantool/go-discovery/subscriber"
@@ -594,5 +595,84 @@ groups:
 	// AppTags: [foo bar]
 	// Group: foo
 	// Replicaset: bar
+	// Done.
+}
+
+func Example_observer_Accumulator() {
+	events := []discovery.Event{
+		{
+			Type: discovery.EventTypeAdd,
+			New: discovery.Instance{
+				Name:  "Cpt. Jack Sparrow",
+				Group: "Black Pearl",
+			},
+		},
+		{
+			Type: discovery.EventTypeUpdate,
+			Old: discovery.Instance{
+				Name:  "Cpt. Jack Sparrow",
+				Group: "Black Pearl",
+			},
+			New: discovery.Instance{
+				Name: "Cpt. Jack Sparrow",
+			},
+		},
+		{
+			Type: discovery.EventTypeAdd,
+			New: discovery.Instance{
+				Name:  "Cpt. Barbossa",
+				Group: "Black Pearl",
+			},
+		},
+		{
+			Type: discovery.EventTypeUpdate,
+			Old: discovery.Instance{
+				Name:  "Cpt. Barbossa",
+				Group: "Black Pearl",
+			},
+			New: discovery.Instance{
+				Name: "Cpt. Barbossa",
+			},
+		},
+		{
+			Type: discovery.EventTypeRemove,
+			Old: discovery.Instance{
+				Name: "Cpt. Barbossa",
+			},
+		},
+		{
+			Type: discovery.EventTypeUpdate,
+			Old: discovery.Instance{
+				Name: "Cpt. Jack Sparrow",
+			},
+			New: discovery.Instance{
+				Name:       "Cpt. Jack Sparrow",
+				Group:      "Black Pearl",
+				Replicaset: "Pirates",
+			},
+		},
+	}
+
+	obs := newExampleObserver()
+	obs.wgEvent.Add(1)
+
+	accumulator := observer.NewAccumulator(obs)
+
+	accumulator.Observe(events, nil)
+
+	obs.wgEvent.Wait()
+	fmt.Println("Done.")
+
+	// Output:
+	// An event found.
+	// Type: add
+	// Group: Black Pearl
+	// Replicaset: Pirates
+	// Name: Cpt. Jack Sparrow
+	// Mode: any
+	// URI: []
+	// Roles: []
+	// RolesTags: []
+	// AppTags: []
 	// Done.
 }
