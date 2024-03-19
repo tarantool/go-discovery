@@ -266,9 +266,10 @@ func (p *Pool) removeInstance(instance discovery.Instance) {
 		state.AddCancel()
 		<-state.AddDone
 		if state.Added {
-			err := p.pool.Load().Remove(instance.Name)
-			log.Printf("an error on an instance removing %q: %s",
-				instance.Name, err)
+			if err := p.pool.Load().Remove(instance.Name); err != nil {
+				log.Printf("an error on an instance removing %q: %s",
+					instance.Name, err)
+			}
 		}
 	}
 }
