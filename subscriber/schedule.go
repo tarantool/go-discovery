@@ -26,12 +26,6 @@ type Schedule struct {
 }
 
 var (
-	// ErrSubscriptionExists is an error that tells that the subscription for
-	// this Schedule subscriber already exists.
-	// Only one subscribed observer is allowed for a Schedule subscriber.
-	// To reuse a Schedule, method Unsubscribe() should be called for an
-	// unused observer.
-	ErrSubscriptionExists = fmt.Errorf("subscription already exists")
 	// ErrMissingScheduler is an error that tells that the provided
 	// scheduler is nil.
 	ErrMissingScheduler = fmt.Errorf("scheduler is missing")
