@@ -2,7 +2,6 @@ package subscriber
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/tarantool/go-discovery"
 )
@@ -78,12 +77,6 @@ type Filter struct {
 	subscriber discovery.Subscriber
 	filters    []discovery.Filter
 }
-
-var (
-	// ErrMissingSubscriber is an error that tells that the provided inner
-	// subscriber is nil.
-	ErrMissingSubscriber = fmt.Errorf("inner subscriber is missing")
-)
 
 // NewFilter creates a Filter with given inner subscriber and filters.
 func NewFilter(subscriber discovery.Subscriber,
