@@ -282,9 +282,9 @@ func TestPool_Observe(t *testing.T) {
 	for i, role := range roles {
 		switch role {
 		case true:
-			instances[i].Mode = discovery.ModeRW
-		case false:
 			instances[i].Mode = discovery.ModeRO
+		case false:
+			instances[i].Mode = discovery.ModeRW
 		}
 	}
 
@@ -343,9 +343,9 @@ func TestPool_stop_and_start_instances(t *testing.T) {
 	for i, role := range roles {
 		switch role {
 		case true:
-			instances[i].Mode = discovery.ModeRW
-		case false:
 			instances[i].Mode = discovery.ModeRO
+		case false:
+			instances[i].Mode = discovery.ModeRW
 		}
 	}
 
@@ -393,9 +393,9 @@ func TestPool_choose_instance_by_a_balancer(t *testing.T) {
 	for i, role := range roles {
 		switch role {
 		case true:
-			instances[i].Mode = discovery.ModeRW
-		case false:
 			instances[i].Mode = discovery.ModeRO
+		case false:
+			instances[i].Mode = discovery.ModeRW
 		}
 	}
 
@@ -455,9 +455,9 @@ func TestPool_balancers_concurrent(t *testing.T) {
 	for i, role := range roles {
 		switch role {
 		case true:
-			instances[i].Mode = discovery.ModeRW
-		case false:
 			instances[i].Mode = discovery.ModeRO
+		case false:
+			instances[i].Mode = discovery.ModeRW
 		}
 	}
 
