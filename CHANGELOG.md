@@ -28,6 +28,7 @@ Versioning](http://semver.org/spec/v2.0.0.html) except to the first release.
 
 * An invalid instance mode in the pool (`ModeRO` instead of `ModeRW` and
   vice versa) (#9).
+* Remove unnecessary logging on successful instance remove from pool (#9).
 
 ## [v0.1.0] - 2024-04-03
 
