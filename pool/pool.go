@@ -77,16 +77,16 @@ func NewPool(factory discovery.DialerFactory, balancer Balancer) (*Pool, error) 
 }
 
 // Observe observes instances configurations update events. The
-// subscribtion is supported to only a single discovery.Subscriber at the
+// subscription is supported to only a single discovery.Subscriber at the
 // moment.
 //
-// A concurrent subscribtion to >1 discovery.Subscriber will lead to
+// A concurrent subscription to >1 discovery.Subscriber will lead to
 // an invalid events processing and undefined behavior:
 //
 //	subscriber.Subscribe(pool)
 //	otherSubscriber.Subscribe(pool)
 //
-// At the same time it supports re-subscribtion, so the code:
+// At the same time it supports re-subscription, so the code:
 //
 //	subscriber.Subscribe(pool)
 //	subscriber.Unsubscribe(pool)
@@ -286,7 +286,7 @@ func newConnectionHandler(pool *Pool) *connectionHandler {
 	}
 }
 
-// Discovered is called when ttpool.ConnectionPool discoveres an instance.
+// Discovered is called when ttpool.ConnectionPool discovers an instance.
 // The handler call adds the instance to the pool balancer.
 func (h *connectionHandler) Discovered(name string, _ *tarantool.Connection,
 	role ttpool.Role) error {
@@ -307,7 +307,7 @@ func (h *connectionHandler) Discovered(name string, _ *tarantool.Connection,
 	return nil
 }
 
-// Diactivated is called when ttpool.ConnectionPool disconnects an instance.
+// Deactivated is called when ttpool.ConnectionPool disconnects an instance.
 // The handler call removes the instance from the pool balancer.
 func (h *connectionHandler) Deactivated(name string, _ *tarantool.Connection,
 	_ ttpool.Role) error {
@@ -321,9 +321,9 @@ func roleToMode(role ttpool.Role) discovery.Mode {
 	case ttpool.UnknownRole:
 		return discovery.ModeAny
 	case ttpool.MasterRole:
-		return discovery.ModeRO
-	case ttpool.ReplicaRole:
 		return discovery.ModeRW
+	case ttpool.ReplicaRole:
+		return discovery.ModeRO
 	default:
 		// It should not happen, but panic is not a good idea.
 		log.Printf("Unknown role: %d", role)
