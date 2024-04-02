@@ -6,8 +6,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic
 Versioning](http://semver.org/spec/v2.0.0.html) except to the first release.
 
-
 ## [Unreleased]
+
+### Added
+
+### Changed
+
+### Fixed
+
+## [v0.2.0] - 2024-04-03
+
+The release adds missed features from RFC and fixes found bugs.
 
 ### Added
 
@@ -21,14 +30,16 @@ Versioning](http://semver.org/spec/v2.0.0.html) except to the first release.
 
 ### Changed
 
-* Move `DialerFactory` interface to the main package (#4).
-  Move `NetDialerFactory` to the `dial` package.
+* `DialerFactory` interface is moved to the main package from the `pool`
+  package (#4).
+* `NetDialerFactory` is moved to the `dial` package from the `pool`
+  package (#4).
 
 ### Fixed
 
 * An invalid instance mode in the pool (`ModeRO` instead of `ModeRW` and
   vice versa) (#9).
-* Remove unnecessary logging on successful instance remove from pool (#9).
+* Unnecessary logging on successful instance removal from a pool (#9).
 
 ## [v0.1.0] - 2024-04-03
 
