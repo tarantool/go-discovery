@@ -21,7 +21,7 @@ var (
 	ErrMissingDialerFactory = fmt.Errorf("dialer factory argument is missing")
 	// ErrMissingBalancer is returned if a nil balancer is passed to
 	// the Pool constructor.
-	ErrMissingBalancer = fmt.Errorf("dialer factory argument is missing")
+	ErrMissingBalancer = fmt.Errorf("balancer argument is missing")
 	// ErrUnsubscribed is returned if the pool does not have an active
 	// subscription to a Subscriber.
 	ErrUnsubscribed = fmt.Errorf("pool is not subscribed yet")
