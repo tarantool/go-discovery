@@ -158,7 +158,7 @@ groups:
 			filter.NameOneOf{Names: []string{"instance1"}},
 		)
 
-		// Subscribe the pool for updates from the subscriber. Subscribtion
+		// Subscribe the pool for updates from the subscriber. Subscription
 		// only to single subscriber at a moment is supported.
 		err := etcdSubscriber.Subscribe(context.Background(), examplePool)
 		if err != nil {
