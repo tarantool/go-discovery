@@ -1,11 +1,6 @@
 package dial
 
 import (
-	"fmt"
-	"strings"
-
-	"golang.org/x/exp/slices"
-
 	"github.com/tarantool/go-discovery"
 	"github.com/tarantool/go-tarantool/v2"
 )
@@ -34,21 +29,9 @@ func NewNetDialerFactory(username, password string, opts tarantool.Opts) *NetDia
 // NewDialer creates new network dialer and options for it.
 func (f *NetDialerFactory) NewDialer(
 	instance discovery.Instance) (tarantool.Dialer, tarantool.Opts, error) {
-	if len(instance.URI) == 0 {
-		return nil, f.opts,
-			fmt.Errorf("%s instance URI list is empty", instance.Name)
-	}
-
-	// First look for unix-socket URI.
-	var uri string
-	if uriIndex := slices.IndexFunc(instance.URI, func(uri string) bool {
-		return strings.HasPrefix(uri, "unix://") ||
-			strings.HasPrefix(uri, "unix:") ||
-			strings.HasPrefix(uri, "unix/:")
-	}); uriIndex == -1 {
-		uri = instance.URI[0]
-	} else {
-		uri = instance.URI[uriIndex]
+	uri, err := GetURIPreferUnix(instance)
+	if err != nil {
+		return nil, f.opts, err
 	}
 
 	return &tarantool.NetDialer{

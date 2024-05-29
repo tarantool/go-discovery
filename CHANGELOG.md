@@ -14,6 +14,8 @@ Versioning](http://semver.org/spec/v2.0.0.html) except to the first release.
   configuration path (#34). This field is a replacement for `Instance.AppTags`
   and `Instance.RolesTags`.
 * Filter `LabelsContain` for filtering instance by labels (#34).
+* `GetURIPreferUnix` util for `dial` submodule (previously a private part of
+  `NetDialerFactory` implementation).
 
 ### Changed
 

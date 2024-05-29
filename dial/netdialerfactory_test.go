@@ -30,7 +30,7 @@ func TestNetDialerFactory_NewDialer(t *testing.T) {
 		wantErr     bool
 	}{
 		{
-			name: "One uri test",
+			name: "Single URI",
 			factoryArgs: factoryArgs{
 				"user",
 				"password",
@@ -47,7 +47,7 @@ func TestNetDialerFactory_NewDialer(t *testing.T) {
 			},
 		},
 		{
-			name: "Select unit first",
+			name: "Prefer Unix socket",
 			factoryArgs: factoryArgs{
 				"user",
 				"pwd",
@@ -65,7 +65,7 @@ func TestNetDialerFactory_NewDialer(t *testing.T) {
 			},
 		},
 		{
-			name: "Take first uri",
+			name: "Take first URI",
 			factoryArgs: factoryArgs{
 				"user",
 				"pwd",
