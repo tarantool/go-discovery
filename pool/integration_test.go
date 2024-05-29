@@ -195,7 +195,20 @@ func waitInstances(t testing.TB,
 	}
 }
 
+func assertTarantoolVersion(t testing.TB) {
+	tooOld, err := test_helpers.IsTarantoolVersionLess(3, 0, 0)
+	if err != nil {
+		t.Fatalf("Could not check the Tarantool version: %s", err)
+	}
+
+	if tooOld {
+		t.Fatalf("Tarantool 3 is required (library uses WATCH_ONCE)")
+	}
+}
+
 func startPool(t testing.TB) []test_helpers.TarantoolInstance {
+	assertTarantoolVersion(t)
+
 	waitStart := 100 * time.Millisecond
 	connectRetry := 10
 	retryTimeout := 500 * time.Millisecond

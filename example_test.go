@@ -29,7 +29,24 @@ func init() {
 	log.SetOutput(io.Discard)
 }
 
+func checkTarantoolVersion() error {
+	tooOld, err := test_helpers.IsTarantoolVersionLess(3, 0, 0)
+	if err != nil {
+		return fmt.Errorf("Could not check the Tarantool version: %w", err)
+	}
+
+	if tooOld {
+		return fmt.Errorf("Tarantool 3 is required (library uses WATCH_ONCE)")
+	}
+
+	return nil
+}
+
 func exampleStartTarantool(address string) (test_helpers.TarantoolInstance, error) {
+	if err := checkTarantoolVersion(); err != nil {
+		return test_helpers.TarantoolInstance{}, err
+	}
+
 	dialer := tarantool.NetDialer{
 		Address:  address,
 		User:     "testuser",

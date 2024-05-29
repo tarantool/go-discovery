@@ -51,12 +51,25 @@ var startOpts test_helpers.StartOpts = test_helpers.StartOpts{
 func startTarantool(t testing.TB) test_helpers.TarantoolInstance {
 	t.Helper()
 
+	assertTarantoolVersion(t)
+
 	inst, err := test_helpers.StartTarantool(startOpts)
 	if err != nil {
 		stopTarantool(inst)
 		t.Fatalf("Failed to prepare Tarantool: %s", err)
 	}
 	return inst
+}
+
+func assertTarantoolVersion(t testing.TB) {
+	tooOld, err := test_helpers.IsTarantoolVersionLess(3, 0, 0)
+	if err != nil {
+		t.Fatalf("Could not check the Tarantool version: %s", err)
+	}
+
+	if tooOld {
+		t.Fatalf("Tarantool 3 is required (library uses WATCH_ONCE)")
+	}
 }
 
 func stopTarantool(instance test_helpers.TarantoolInstance) {
