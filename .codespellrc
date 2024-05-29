@@ -1,4 +1,5 @@
 [codespell]
 skip = ./.git,./testdata,./LICENSE,./go.mod,./go.sum
+ignore-words-list = gost
 count =
 quiet-level = 3

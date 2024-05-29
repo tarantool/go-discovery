@@ -185,12 +185,15 @@ github.com/stretchr/testify v1.8.4 h1:CcVxjf3Q8PM0mHUKJCdn+eZZtm5yQwehR5yeSVQQcU
 github.com/stretchr/testify v1.8.4/go.mod h1:sz/lmYIOXD/1dqDmKjjqLyZ2RngseejIcXlSw2iwfAo=
 github.com/tarantool/go-iproto v1.0.0 h1:quC4hdFhCuFYaCqOFgUxH2foRkhAy+TlEy7gQLhdVjw=
 github.com/tarantool/go-iproto v1.0.0/go.mod h1:LNCtdyZxojUed8SbOiYHoc3v9NvaZTB7p96hUySMlIo=
-github.com/tarantool/go-openssl v0.0.8-0.20230307065445-720eeb389195 h1:/AN3eUPsTlvF6W+Ng/8ZjnSU6o7L0H4Wb9GMks6RkzU=
 github.com/tarantool/go-openssl v0.0.8-0.20230307065445-720eeb389195/go.mod h1:M7H4xYSbzqpW/ZRBMyH0eyqQBsnhAMfsYk5mv0yid7A=
+github.com/tarantool/go-openssl v1.0.0 h1:kE0XhXi8b1qWOLwmcasAS67OyQdGXn42t0Qv3NwEjWY=
+github.com/tarantool/go-openssl v1.0.0/go.mod h1:M7H4xYSbzqpW/ZRBMyH0eyqQBsnhAMfsYk5mv0yid7A=
 github.com/tarantool/go-tarantool v1.12.2 h1:u4g+gTOHNxbUDJv0EIUFkRurU/lTQSzWrz8o7bHVAqI=
 github.com/tarantool/go-tarantool v1.12.2/go.mod h1:QRiXv0jnxwgxHtr9ZmifSr/eRba76gTUBgp69pDMX1U=
 github.com/tarantool/go-tarantool/v2 v2.1.0 h1:IY33WoS8Kqb+TxNnKbzu/7yVkiCNZGhbG5Gw0/tMfSk=
 github.com/tarantool/go-tarantool/v2 v2.1.0/go.mod h1:cpjGW5FHAXIMf0PKZte70pMOeadw1MA/hrDv1LblWk4=
+github.com/tarantool/go-tlsdialer v1.0.0 h1:UZ67erz/QiThttIvcHtUnUWo1ZJ/BlQoN088NvkVmBQ=
+github.com/tarantool/go-tlsdialer v1.0.0/go.mod h1:IZuFRmnasGSBtPGZi3LMrpaSUgHYR+hDZ4ec7gR9k/0=
 github.com/tarantool/tt/lib/cluster v0.0.0-20240226063114-58f1f7712c6f h1:RcLoIeZUe5vsS/+R1MtnFDTjXVAUniCcvosYuilsxFU=
 github.com/tarantool/tt/lib/cluster v0.0.0-20240226063114-58f1f7712c6f/go.mod h1:VC//7Ev6Q+7fVnle8/x17JEoHYfGDBCVVDUA1JmT9e0=
 github.com/tmc/grpc-websocket-proxy v0.0.0-20201229170055-e5319fda7802 h1:uruHq4dN7GR16kFc5fp3d1RIYzJW5onx8Ybykw2YQFA=
