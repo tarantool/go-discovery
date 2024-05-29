@@ -30,6 +30,10 @@ func init() {
 }
 
 func exampleStartTarantool(address string) (test_helpers.TarantoolInstance, error) {
+	if err := assertTarantoolVersion(); err != nil {
+		return test_helpers.TarantoolInstance{}, err
+	}
+
 	dialer := tarantool.NetDialer{
 		Address:  address,
 		User:     "testuser",

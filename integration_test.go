@@ -2,6 +2,7 @@ package discovery_test
 
 import (
 	"context"
+	"fmt"
 	"sync"
 	"sync/atomic"
 	"testing"
@@ -51,12 +52,29 @@ var startOpts test_helpers.StartOpts = test_helpers.StartOpts{
 func startTarantool(t testing.TB) test_helpers.TarantoolInstance {
 	t.Helper()
 
+	if err := assertTarantoolVersion(); err != nil {
+		t.Fatalf(err.Error())
+	}
+
 	inst, err := test_helpers.StartTarantool(startOpts)
 	if err != nil {
 		stopTarantool(inst)
 		t.Fatalf("Failed to prepare Tarantool: %s", err)
 	}
 	return inst
+}
+
+func assertTarantoolVersion() error {
+	tooOld, err := test_helpers.IsTarantoolVersionLess(3, 0, 0)
+	if err != nil {
+		return fmt.Errorf("Could not check the Tarantool version: %w", err)
+	}
+
+	if tooOld {
+		return fmt.Errorf("Tarantool 3 is required (library uses WATCH_ONCE)")
+	}
+
+	return nil
 }
 
 func stopTarantool(instance test_helpers.TarantoolInstance) {

@@ -196,6 +196,10 @@ func waitInstances(t testing.TB,
 }
 
 func startPool(t testing.TB) []test_helpers.TarantoolInstance {
+	if err := assertTarantoolVersion(); err != nil {
+		t.Fatalf(err.Error())
+	}
+
 	waitStart := 100 * time.Millisecond
 	connectRetry := 10
 	retryTimeout := 500 * time.Millisecond
@@ -219,6 +223,19 @@ func startPool(t testing.TB) []test_helpers.TarantoolInstance {
 	instances, err := test_helpers.StartTarantoolInstances(opts)
 	require.NoError(t, err)
 	return instances
+}
+
+func assertTarantoolVersion() error {
+	tooOld, err := test_helpers.IsTarantoolVersionLess(3, 0, 0)
+	if err != nil {
+		return fmt.Errorf("Could not check the Tarantool version: %w", err)
+	}
+
+	if tooOld {
+		return fmt.Errorf("Tarantool 3 is required (library uses WATCH_ONCE)")
+	}
+
+	return nil
 }
 
 func stopPool(_ testing.TB, instances []test_helpers.TarantoolInstance) {
