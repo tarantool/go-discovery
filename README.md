@@ -23,6 +23,7 @@ import (
 	"github.com/tarantool/go-tarantool/v2"
 
 	"github.com/tarantool/go-discovery"
+	"github.com/tarantool/go-discovery/dial"
 	"github.com/tarantool/go-discovery/discoverer"
 	"github.com/tarantool/go-discovery/filter"
 	"github.com/tarantool/go-discovery/pool"
@@ -46,7 +47,7 @@ func main() {
 	// requests in round-robin. But you could use pool.PriorityBalancer to
 	// send requests by instances priority.
 	examplePool, err := pool.NewPool(
-		pool.NewNetDialerFactory("testuser", "testpass", tarantool.Opts{
+		dial.NewNetDialerFactory("testuser", "testpass", tarantool.Opts{
 			Timeout: 5 * time.Second,
 		}),
 		pool.NewRoundRobinBalancer(),
