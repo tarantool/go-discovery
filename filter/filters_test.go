@@ -14,9 +14,8 @@ var _ discovery.Filter = filter.ReplicasetOneOf{}
 var _ discovery.Filter = filter.NameOneOf{}
 var _ discovery.Filter = filter.ModeOneOf{}
 var _ discovery.Filter = filter.URIAnyOf{}
-var _ discovery.Filter = filter.RolesContains{}
-var _ discovery.Filter = filter.RolesTagsContains{}
-var _ discovery.Filter = filter.AppTagsContains{}
+var _ discovery.Filter = filter.RolesContain{}
+var _ discovery.Filter = filter.LabelsContain{}
 
 func TestFilters(t *testing.T) {
 	cases := []struct {
@@ -160,111 +159,109 @@ func TestFilters(t *testing.T) {
 			Expected: true,
 		},
 		{
-			Name:     "roles_contains_empty_isntance_and_filter",
+			Name:     "roles_contain_empty_isntance_and_filter",
 			Instance: discovery.Instance{},
-			Filter:   filter.RolesContains{},
-			Expected: false,
+			Filter:   filter.RolesContain{},
+			Expected: true,
 		},
 		{
-			Name:     "roles_contains_empty_filter",
+			Name:     "roles_contain_empty_filter",
 			Instance: discovery.Instance{Roles: []string{"foo"}},
-			Filter:   filter.RolesContains{},
-			Expected: false,
+			Filter:   filter.RolesContain{},
+			Expected: true,
 		},
 		{
-			Name:     "roles_contains_no_match",
+			Name:     "roles_contain_no_match",
 			Instance: discovery.Instance{Roles: []string{"zoo", "car"}},
-			Filter:   filter.RolesContains{[]string{"foo", "bar"}},
+			Filter:   filter.RolesContain{[]string{"foo", "bar"}},
 			Expected: false,
 		},
 		{
-			Name:     "roles_contains_not_full_match",
+			Name:     "roles_contain_not_full_match",
 			Instance: discovery.Instance{Roles: []string{"foo"}},
-			Filter:   filter.RolesContains{[]string{"foo", "bar"}},
+			Filter:   filter.RolesContain{[]string{"foo", "bar"}},
 			Expected: false,
 		},
 		{
-			Name:     "roles_contains_full_match",
+			Name:     "roles_contain_full_match",
 			Instance: discovery.Instance{Roles: []string{"foo", "car"}},
-			Filter:   filter.RolesContains{[]string{"foo", "car"}},
+			Filter:   filter.RolesContain{[]string{"foo", "car"}},
 			Expected: true,
 		},
 		{
-			Name:     "roles_contains_extra_match",
+			Name:     "roles_contain_extra_match",
 			Instance: discovery.Instance{Roles: []string{"foo", "car", "zoo"}},
-			Filter:   filter.RolesContains{[]string{"foo", "car"}},
+			Filter:   filter.RolesContain{[]string{"foo", "car"}},
 			Expected: true,
 		},
 		{
-			Name:     "roles_tags_contains_empty_isntance_and_filter",
+			Name:     "labels_contain_empty_isntance_and_filter",
 			Instance: discovery.Instance{},
-			Filter:   filter.RolesTagsContains{},
-			Expected: false,
-		},
-		{
-			Name:     "roles_tags_contains_empty_filter",
-			Instance: discovery.Instance{RolesTags: []string{"foo"}},
-			Filter:   filter.RolesTagsContains{},
-			Expected: false,
-		},
-		{
-			Name:     "roles_tags_contains_no_match",
-			Instance: discovery.Instance{RolesTags: []string{"zoo", "car"}},
-			Filter:   filter.RolesTagsContains{[]string{"foo", "bar"}},
-			Expected: false,
-		},
-		{
-			Name:     "roles_tags_contains_not_full_match",
-			Instance: discovery.Instance{RolesTags: []string{"foo"}},
-			Filter:   filter.RolesTagsContains{[]string{"foo", "bar"}},
-			Expected: false,
-		},
-		{
-			Name:     "roles_tags_contains_full_match",
-			Instance: discovery.Instance{RolesTags: []string{"foo", "car"}},
-			Filter:   filter.RolesTagsContains{[]string{"foo", "car"}},
+			Filter:   filter.LabelsContain{},
 			Expected: true,
 		},
 		{
-			Name:     "roles_tags_contains_extra_match",
-			Instance: discovery.Instance{RolesTags: []string{"foo", "car", "zoo"}},
-			Filter:   filter.RolesTagsContains{[]string{"foo", "car"}},
+			Name: "labels_contain_empty_filter",
+			Instance: discovery.Instance{Labels: map[string]string{
+				"foo": "bar",
+			}},
+			Filter:   filter.LabelsContain{},
 			Expected: true,
 		},
 		{
-			Name:     "app_tags_contains_empty_isntance_and_filter",
-			Instance: discovery.Instance{},
-			Filter:   filter.AppTagsContains{},
+			Name: "labels_contain_no_match",
+			Instance: discovery.Instance{Labels: map[string]string{
+				"zoo": "car",
+			}},
+			Filter: filter.LabelsContain{map[string]string{
+				"foo": "bar",
+			}},
 			Expected: false,
 		},
 		{
-			Name:     "app_tags_contains_empty_filter",
-			Instance: discovery.Instance{AppTags: []string{"foo"}},
-			Filter:   filter.AppTagsContains{},
+			Name: "labels_contain_no_value_match",
+			Instance: discovery.Instance{Labels: map[string]string{
+				"zoo": "car",
+			}},
+			Filter: filter.LabelsContain{map[string]string{
+				"zoo": "bar",
+			}},
 			Expected: false,
 		},
 		{
-			Name:     "app_tags_contains_no_match",
-			Instance: discovery.Instance{AppTags: []string{"zoo", "car"}},
-			Filter:   filter.AppTagsContains{[]string{"foo", "bar"}},
+			Name: "labels_contain_not_full_match",
+			Instance: discovery.Instance{Labels: map[string]string{
+				"zoo": "car",
+			}},
+			Filter: filter.LabelsContain{map[string]string{
+				"bar": "foo",
+				"zoo": "car",
+			}},
 			Expected: false,
 		},
 		{
-			Name:     "app_tags_contains_not_full_match",
-			Instance: discovery.Instance{AppTags: []string{"foo"}},
-			Filter:   filter.AppTagsContains{[]string{"foo", "bar"}},
-			Expected: false,
-		},
-		{
-			Name:     "app_tags_contains_full_match",
-			Instance: discovery.Instance{AppTags: []string{"foo", "car"}},
-			Filter:   filter.AppTagsContains{[]string{"foo", "car"}},
+			Name: "labels_contain_full_match",
+			Instance: discovery.Instance{Labels: map[string]string{
+				"bar": "foo",
+				"zoo": "car",
+			}},
+			Filter: filter.LabelsContain{map[string]string{
+				"bar": "foo",
+				"zoo": "car",
+			}},
 			Expected: true,
 		},
 		{
-			Name:     "app_tags_contains_extra_match",
-			Instance: discovery.Instance{AppTags: []string{"foo", "car", "zoo"}},
-			Filter:   filter.AppTagsContains{[]string{"foo", "car"}},
+			Name: "labels_contain_extra_match",
+			Instance: discovery.Instance{Labels: map[string]string{
+				"bar": "foo",
+				"zoo": "car",
+				"car": "zoo",
+			}},
+			Filter: filter.LabelsContain{map[string]string{
+				"bar": "foo",
+				"zoo": "car",
+			}},
 			Expected: true,
 		},
 	}

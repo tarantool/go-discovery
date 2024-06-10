@@ -91,16 +91,8 @@ groups:
               advertise:
                 client: 127.0.0.1:3013
             roles: [crud]
-            roles_cfg:
-              tags:
-              - any
-              - bar
-              - 3
-            app:
-              cfg:
-                tags:
-                - foo
-                - bar
+            labels:
+              tags: "any,bar,3"
           instance2:
             iproto:
               advertise:
@@ -234,8 +226,7 @@ func (o *exampleObserver) Observe(events []discovery.Event, err error) {
 			fmt.Println("Mode:", instance.Mode.String())
 			fmt.Println("URI:", instance.URI)
 			fmt.Println("Roles:", instance.Roles)
-			fmt.Println("RolesTags:", instance.RolesTags)
-			fmt.Println("AppTags:", instance.AppTags)
+			fmt.Println("Labels:", instance.Labels)
 		}
 		o.wgEvent.Done()
 	}
@@ -284,16 +275,8 @@ groups:
               advertise:
                 client: localhost:3011
             roles: [crud]
-            roles_cfg:
-              tags:
-              - any
-              - bar
-              - 3
-            app:
-              cfg:
-                tags:
-                - foo
-                - bar
+            labels:
+              tags: "any,bar,3"
 `)
 	cancel()
 
@@ -317,8 +300,7 @@ groups:
 	// Mode: ro
 	// URI: [localhost:3011]
 	// Roles: [crud]
-	// RolesTags: [any bar 3]
-	// AppTags: [foo bar]
+	// Labels: map[tags:any,bar,3]
 	// Error from the observer: unsubscribed
 	// Done.
 }
@@ -407,16 +389,8 @@ groups:
                   params:
                     transport: plain
             roles: [crud]
-            roles_cfg:
-              tags:
-              - any
-              - bar
-              - 3
-            app:
-              cfg:
-                tags:
-                - foo
-                - bar
+            labels:
+              tags: "any,bar,3"
   foo2:
     replicasets:
       bar2:
@@ -429,16 +403,8 @@ groups:
                   params:
                     transport: ssl
             roles: [crud]
-            roles_cfg:
-              tags:
-              - any
-              - bar
-              - 3
-            app:
-              cfg:
-                tags:
-                - foo2
-                - bar
+            labels:
+              tags: "any,bar,3"
 `)
 	cancel()
 
@@ -462,8 +428,7 @@ groups:
 	// Mode: ro
 	// URI: [localhost:3011]
 	// Roles: [crud]
-	// RolesTags: [any bar 3]
-	// AppTags: [foo bar]
+	// Labels: map[tags:any,bar,3]
 	// Error from the observer: unsubscribed
 	// Done.
 }
@@ -541,16 +506,8 @@ groups:
               advertise:
                 client: 127.0.0.1:3013
             roles: [crud]
-            roles_cfg:
-              tags:
-              - any
-              - bar
-              - 3
-            app:
-              cfg:
-                tags:
-                - foo
-                - bar
+            labels:
+              tags: "any,bar,3"
           instance2:
             iproto:
               advertise:
@@ -587,7 +544,7 @@ groups:
 		fmt.Println("Mode:", instance.Mode)
 		fmt.Println("URI:", instance.URI)
 		fmt.Println("Roles:", instance.Roles)
-		fmt.Println("AppTags:", instance.AppTags)
+		fmt.Println("Labels:", instance.Labels)
 		fmt.Println("Group:", instance.Group)
 		fmt.Println("Replicaset:", instance.Replicaset)
 	}
@@ -599,7 +556,7 @@ groups:
 	// Mode: rw
 	// URI: [127.0.0.1:3013]
 	// Roles: [crud]
-	// AppTags: [foo bar]
+	// Labels: map[tags:any,bar,3]
 	// Group: foo
 	// Replicaset: bar
 	// Done.
@@ -679,8 +636,7 @@ func Example_observer_Accumulator() {
 	// Mode: any
 	// URI: []
 	// Roles: []
-	// RolesTags: []
-	// AppTags: []
+	// Labels: map[]
 	// Error from the observer: done
 	// Done.
 }
@@ -738,16 +694,8 @@ groups:
               advertise:
                 client: 127.0.0.1:3013
             roles: [crud]
-            roles_cfg:
-              tags:
-              - any
-              - bar
-              - 3
-            app:
-              cfg:
-                tags:
-                - foo
-                - bar
+            labels:
+              tags: "any,bar,3"
           instance2:
             iproto:
               advertise:
@@ -778,8 +726,7 @@ groups:
 	// Mode: rw
 	// URI: [127.0.0.1:3013]
 	// Roles: [crud]
-	// RolesTags: [any bar 3]
-	// AppTags: [foo bar]
+	// Labels: map[tags:any,bar,3]
 	// An event found.
 	// Type: remove
 	// Group: foo
@@ -788,8 +735,7 @@ groups:
 	// Mode: rw
 	// URI: [127.0.0.1:3013]
 	// Roles: [crud]
-	// RolesTags: [any bar 3]
-	// AppTags: [foo bar]
+	// Labels: map[tags:any,bar,3]
 	// Error from the observer: unsubscribed
 	// Done.
 }

@@ -22,12 +22,10 @@ func isAnyValueInSet[K comparable](values []K, set []K) bool {
 
 // isAllValuesInSet returns true if all values present in the set.
 func isAllValuesInSet[K comparable](values []K, set []K) bool {
-	result := false
 	for _, value := range values {
 		if !isValueInSet(value, set) {
 			return false
 		}
-		result = true
 	}
-	return result
+	return true
 }
