@@ -10,7 +10,20 @@ Versioning](http://semver.org/spec/v2.0.0.html) except to the first release.
 
 ### Added
 
+* Field `Instance.Labels` is a map that contains data from the `labels`
+  configuration path (#34). This field is a replacement for `Instance.AppTags`
+  and `Instance.RolesTags`.
+* Filter `LabelsContain` for filtering instance by labels (#34).
+
 ### Changed
+
+* Filter `RolesContains` renamed to `RolesContain` (#34).
+* Filter `RolesContain` returns true if empty (#34).
+
+### Removed
+
+* Fields `Instance.AppTags` and `Instance.RolesTags` (#34).
+* Filters `AppTagsContains` and `RolesTagsContains` (#34).
 
 ### Fixed
 

@@ -525,7 +525,7 @@ groups:
 			},
 		},
 		{
-			Name: "roles tags",
+			Name: "labels",
 			Values: []string{
 				`
 groups:
@@ -534,21 +534,16 @@ groups:
       bar:
         instances:
           zoo:
-            roles_cfg:
-              tags:
-              - foo
-              - bar
+            labels:
+              foo: bar
+              bar: zoo
           car:
-            roles_cfg:
-              tags:
-              - zoo
+            labels:
+              tags: "a,b,c"
           tar:
-            roles_cfg:
-              tags:
-              - 2.2
-          no:
-            roles_cfg:
-              tags: "something"
+            labels:
+              float: 2.2
+          no: {}
 `},
 			Expected: []discovery.Instance{
 				discovery.Instance{
@@ -556,89 +551,35 @@ groups:
 					Replicaset: "bar",
 					Name:       "zoo",
 					Mode:       discovery.ModeRO,
-					RolesTags:  []string{"foo", "bar"},
+					Labels: map[string]string{
+						"foo": "bar",
+						"bar": "zoo",
+					},
 				},
 				discovery.Instance{
 					Group:      "foo",
 					Replicaset: "bar",
 					Name:       "car",
 					Mode:       discovery.ModeRO,
-					RolesTags:  []string{"zoo"},
+					Labels: map[string]string{
+						"tags": "a,b,c",
+					},
 				},
 				discovery.Instance{
 					Group:      "foo",
 					Replicaset: "bar",
 					Name:       "tar",
 					Mode:       discovery.ModeRO,
-					RolesTags:  []string{"2.2"},
+					Labels: map[string]string{
+						"float": "2.2",
+					},
 				},
 				discovery.Instance{
 					Group:      "foo",
 					Replicaset: "bar",
 					Name:       "no",
 					Mode:       discovery.ModeRO,
-					RolesTags:  nil,
-				},
-			},
-		},
-		{
-			Name: "app tags",
-			Values: []string{
-				`
-groups:
-  foo:
-    replicasets:
-      bar:
-        instances:
-          zoo:
-            app:
-              cfg:
-                tags:
-                - foo
-                - bar
-          car:
-            app:
-              cfg:
-                tags:
-                - zoo
-          tar:
-            app:
-              cfg:
-                tags:
-                - 2.2
-          no:
-            app:
-              cfg:
-                tags: "something"
-`},
-			Expected: []discovery.Instance{
-				discovery.Instance{
-					Group:      "foo",
-					Replicaset: "bar",
-					Name:       "zoo",
-					Mode:       discovery.ModeRO,
-					AppTags:    []string{"foo", "bar"},
-				},
-				discovery.Instance{
-					Group:      "foo",
-					Replicaset: "bar",
-					Name:       "car",
-					Mode:       discovery.ModeRO,
-					AppTags:    []string{"zoo"},
-				},
-				discovery.Instance{
-					Group:      "foo",
-					Replicaset: "bar",
-					Name:       "tar",
-					Mode:       discovery.ModeRO,
-					AppTags:    []string{"2.2"},
-				},
-				discovery.Instance{
-					Group:      "foo",
-					Replicaset: "bar",
-					Name:       "no",
-					Mode:       discovery.ModeRO,
-					AppTags:    nil,
+					Labels:     nil,
 				},
 			},
 		},
@@ -658,16 +599,8 @@ groups:
               advertise:
                 client: "localhost:3011"
             roles: [crud]
-            roles_cfg:
-              tags:
-              - any
-              - bar
-              - 3
-            app:
-              cfg:
-                tags:
-                - foo
-                - bar
+            labels:
+              tags: "any,bar,3"
 `},
 			Expected: []discovery.Instance{
 				discovery.Instance{
@@ -678,9 +611,10 @@ groups:
 					URI: []string{
 						"localhost:3011",
 					},
-					Roles:     []string{"crud"},
-					RolesTags: []string{"any", "bar", "3"},
-					AppTags:   []string{"foo", "bar"},
+					Roles: []string{"crud"},
+					Labels: map[string]string{
+						"tags": "any,bar,3",
+					},
 				},
 			},
 		},
