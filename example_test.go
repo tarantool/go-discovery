@@ -95,8 +95,8 @@ groups:
               tags: "any,bar,3"
           instance2:
             iproto:
-              advertise:
-                client: 127.0.0.1:3014
+              listen:
+              - uri: 127.0.0.1:3014
           instance3:
             iproto:
               advertise:
@@ -691,8 +691,8 @@ groups:
         instances:
           instance1:
             iproto:
-              advertise:
-                client: 127.0.0.1:3013
+              listen:
+              - uri: 127.0.0.1:3013
             roles: [crud]
             labels:
               tags: "any,bar,3"

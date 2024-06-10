@@ -142,6 +142,9 @@ func parseInstanceConfig(config *cluster.Config,
 			Advertise struct {
 				Client string
 			}
+			Listen []struct {
+				URI string
+			}
 		}
 		Leader string
 		Roles  []string
@@ -177,6 +180,12 @@ func parseInstanceConfig(config *cluster.Config,
 	var uri []string
 	if parsed.Iproto.Advertise.Client != "" {
 		uri = append(uri, parsed.Iproto.Advertise.Client)
+	} else {
+		for _, listen := range parsed.Iproto.Listen {
+			if listen.URI != "" {
+				uri = append(uri, listen.URI)
+			}
+		}
 	}
 	instance.URI = uri
 
