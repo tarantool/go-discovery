@@ -472,6 +472,17 @@ groups:
             iproto:
               advertise:
                 client: "zoo"
+              listen:
+              - uri: "foo"
+                params:
+                  transport: "ssl"
+          foo:
+            iproto:
+              listen:
+              - uri: "foo"
+                params:
+                  transport: "ssl"
+              - uri: "car"
 `},
 			Expected: []discovery.Instance{
 				discovery.Instance{
@@ -487,6 +498,13 @@ groups:
 					Name:       "car",
 					Mode:       discovery.ModeRO,
 					URI:        []string{"zoo"},
+				},
+				discovery.Instance{
+					Group:      "foo",
+					Replicaset: "bar",
+					Name:       "foo",
+					Mode:       discovery.ModeRO,
+					URI:        []string{"foo", "car"},
 				},
 			},
 		},
@@ -598,6 +616,8 @@ groups:
             iproto:
               advertise:
                 client: "localhost:3011"
+              listen:
+              - uri: "localhost:3012"
             roles: [crud]
             labels:
               tags: "any,bar,3"

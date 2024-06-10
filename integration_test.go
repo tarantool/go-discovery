@@ -403,8 +403,8 @@ groups:
         instances:
           zoo:
             iproto: 
-              advertise:
-                client: 127.0.0.1:3013
+              listen:
+              - uri: 127.0.0.1:3013
   zoo:
     replicasets:
       any:

@@ -19,6 +19,8 @@ Versioning](http://semver.org/spec/v2.0.0.html) except to the first release.
 
 * Filter `RolesContains` renamed to `RolesContain` (#34).
 * Filter `RolesContain` returns true if empty (#34).
+* `discoverer.Etcd` uses URIs from `iproto.listen` if no
+  `iproto.advertise.client` (#43).
 
 ### Removed
 
