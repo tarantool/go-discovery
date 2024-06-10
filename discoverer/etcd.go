@@ -145,6 +145,7 @@ func parseInstanceConfig(config *cluster.Config,
 		}
 		Leader string
 		Roles  []string
+		Labels map[string]string
 	}
 
 	if err := yaml.Unmarshal([]byte(config.String()), &parsed); err != nil {
@@ -183,44 +184,7 @@ func parseInstanceConfig(config *cluster.Config,
 	instance.Roles = parsed.Roles
 
 	// Parse tags.
-	instance.RolesTags = parseRolesTags(config)
-	instance.AppTags = parseAppTags(config)
+	instance.Labels = parsed.Labels
 
 	return instance, nil
-}
-
-// parseRolesTags tries to parse roles_cfg.tags as a set of strings.
-func parseRolesTags(config *cluster.Config) []string {
-	var parsed struct {
-		RolesCfg struct {
-			Tags []string
-		} `yaml:"roles_cfg"`
-	}
-
-	if err := yaml.Unmarshal([]byte(config.String()), &parsed); err != nil {
-		// It is ok to fail here because roles_cfg.tags is not defined in
-		// a schema actually and a user may add any value for it.
-		return nil
-	}
-
-	return parsed.RolesCfg.Tags
-}
-
-// parseRolesTags tries to parse app.cfg.tags as a set of strings.
-func parseAppTags(config *cluster.Config) []string {
-	var parsed struct {
-		App struct {
-			Cfg struct {
-				Tags []string
-			}
-		}
-	}
-
-	if err := yaml.Unmarshal([]byte(config.String()), &parsed); err != nil {
-		// It is ok to fail here because app.cfg.tags is not defined in
-		// a schema actually and a user may add any value for it.
-		return nil
-	}
-
-	return parsed.App.Cfg.Tags
 }

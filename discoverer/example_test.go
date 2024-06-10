@@ -52,16 +52,8 @@ groups:
                   params:
                     transport: ssl
             roles: [crud]
-            roles_cfg:
-              tags:
-              - any
-              - bar
-              - 3
-            app:
-              cfg:
-                tags:
-                - foo
-                - bar
+            labels:
+              tags: "any,bar,3"
 `)
 	if err != nil {
 		fmt.Println("Unable to put configuration into etcd:", err)
@@ -79,8 +71,7 @@ groups:
 		fmt.Println("Mode:", instance.Mode.String())
 		fmt.Println("URI:", instance.URI)
 		fmt.Println("Roles:", instance.Roles)
-		fmt.Println("RolesTags:", instance.RolesTags)
-		fmt.Println("AppTags:", instance.AppTags)
+		fmt.Println("Labels:", instance.Labels)
 	}
 	fmt.Println("Error:", err)
 	fmt.Println("Done.")
@@ -97,8 +88,7 @@ groups:
 	// Mode: ro
 	// URI: [localhost:3011]
 	// Roles: [crud]
-	// RolesTags: [any bar 3]
-	// AppTags: [foo bar]
+	// Labels: map[tags:any,bar,3]
 	// Error: <nil>
 	// Done.
 }

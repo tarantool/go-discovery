@@ -229,12 +229,18 @@ func TestSchedule_Subscribe_Events(t *testing.T) {
 				{
 					Name:  "Dwarf",
 					Group: "Dig",
+					Labels: map[string]string{
+						"a": "b",
+					},
 				},
 			},
 			updateInst: []discovery.Instance{
 				{
 					Name:  "Dwarf",
 					Group: "Dig",
+					Labels: map[string]string{
+						"a": "b",
+					},
 				},
 			},
 		},
