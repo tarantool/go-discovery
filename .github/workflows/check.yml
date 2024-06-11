@@ -57,6 +57,7 @@ jobs:
         args: >
           --build-tags go_tarantool_ssl_disable
           --config=.golangci.yml
+          --timeout=5m
 
     - name: golangci-lint
       uses: golangci/golangci-lint-action@v3
@@ -67,6 +68,7 @@ jobs:
           --build-tags go_tarantool_ssl_disable
           --config=.golangci.yml
           --out-${NO_FUTURE}format colored-line-number
+          --timeout=5m
 
   codespell:
     if: (github.event_name == 'push') ||
