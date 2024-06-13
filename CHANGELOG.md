@@ -14,6 +14,8 @@ Versioning](http://semver.org/spec/v2.0.0.html) except to the first release.
   configuration path (#34). This field is a replacement for `Instance.AppTags`
   and `Instance.RolesTags`.
 * Filter `LabelsContain` for filtering instance by labels (#34).
+* Dialer type `CompositeDialer` to make it easier to create your own dialer
+  factories to dial to each URI one by one (#45).
 
 ### Changed
 
@@ -21,6 +23,8 @@ Versioning](http://semver.org/spec/v2.0.0.html) except to the first release.
 * Filter `RolesContain` returns true if empty (#34).
 * `discoverer.Etcd` uses URIs from `iproto.listen` if no
   `iproto.advertise.client` (#43).
+* `NetDialerFactory` at now creates a `Dialer` object that dial to each URI
+  one by one until success (#45).
 
 ### Removed
 

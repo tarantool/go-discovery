@@ -88,8 +88,9 @@ groups:
         instances:
           instance1:
             iproto:
-              advertise:
-                client: 127.0.0.1:3013
+              listen:
+              - uri: 127.0.0.1:3011
+              - uri: 127.0.0.1:3013
             roles: [crud]
             labels:
               tags: "any,bar,3"
