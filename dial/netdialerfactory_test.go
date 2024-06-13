@@ -5,7 +5,6 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 	"github.com/tarantool/go-tarantool/v2"
 
 	"github.com/tarantool/go-discovery"
@@ -26,7 +25,7 @@ func TestNetDialerFactory_NewDialer(t *testing.T) {
 		name        string
 		factoryArgs factoryArgs
 		args        args
-		want        tarantool.NetDialer
+		want        tarantool.Dialer
 		wantErr     bool
 	}{
 		{
@@ -40,14 +39,18 @@ func TestNetDialerFactory_NewDialer(t *testing.T) {
 					"localhost:3301",
 				},
 			}},
-			want: tarantool.NetDialer{
-				Address:  "localhost:3301",
-				User:     "user",
-				Password: "password",
+			want: dial.CompositeDialer{
+				Dialers: []tarantool.Dialer{
+					&tarantool.NetDialer{
+						Address:  "localhost:3301",
+						User:     "user",
+						Password: "password",
+					},
+				},
 			},
 		},
 		{
-			name: "Select unit first",
+			name: "Multiple URI",
 			factoryArgs: factoryArgs{
 				"user",
 				"pwd",
@@ -58,28 +61,19 @@ func TestNetDialerFactory_NewDialer(t *testing.T) {
 					"unix://tmp/iproto.sock",
 				},
 			}},
-			want: tarantool.NetDialer{
-				Address:  "unix://tmp/iproto.sock",
-				User:     "user",
-				Password: "pwd",
-			},
-		},
-		{
-			name: "Take first uri",
-			factoryArgs: factoryArgs{
-				"user",
-				"pwd",
-			},
-			args: args{discovery.Instance{
-				URI: []string{
-					"localhost:3301",
-					"localhost:3302",
+			want: dial.CompositeDialer{
+				Dialers: []tarantool.Dialer{
+					&tarantool.NetDialer{
+						Address:  "localhost:3301",
+						User:     "user",
+						Password: "pwd",
+					},
+					&tarantool.NetDialer{
+						Address:  "unix://tmp/iproto.sock",
+						User:     "user",
+						Password: "pwd",
+					},
 				},
-			}},
-			want: tarantool.NetDialer{
-				Address:  "localhost:3301",
-				User:     "user",
-				Password: "pwd",
 			},
 		},
 		{
@@ -107,6 +101,7 @@ func TestNetDialerFactory_NewDialer(t *testing.T) {
 			wantErr: true,
 		},
 	}
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			opts := tarantool.Opts{
@@ -123,9 +118,7 @@ func TestNetDialerFactory_NewDialer(t *testing.T) {
 			}
 
 			assert.NoError(t, err)
-			gotNet, ok := got.(*tarantool.NetDialer)
-			require.True(t, ok)
-			assert.Equal(t, tt.want, *gotNet)
+			assert.Equal(t, tt.want, got)
 			assert.Equal(t, opts, gotOpts)
 		})
 	}
