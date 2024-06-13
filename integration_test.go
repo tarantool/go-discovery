@@ -404,6 +404,7 @@ groups:
           zoo:
             iproto: 
               listen:
+              - uri: :0
               - uri: 127.0.0.1:3013
   zoo:
     replicasets:
@@ -425,7 +426,7 @@ groups:
 				Replicaset: "bar",
 				Name:       "zoo",
 				Mode:       discovery.ModeRW,
-				URI:        []string{"127.0.0.1:3013"},
+				URI:        []string{":0", "127.0.0.1:3013"},
 			},
 		},
 	}, *obs.recentEvents.Load())
@@ -442,7 +443,7 @@ groups:
 				Replicaset: "bar",
 				Name:       "zoo",
 				Mode:       discovery.ModeRW,
-				URI:        []string{"127.0.0.1:3013"},
+				URI:        []string{":0", "127.0.0.1:3013"},
 			},
 		},
 	}, *obs.recentEvents.Load())

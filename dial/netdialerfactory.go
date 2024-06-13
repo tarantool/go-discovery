@@ -2,9 +2,6 @@ package dial
 
 import (
 	"fmt"
-	"strings"
-
-	"golang.org/x/exp/slices"
 
 	"github.com/tarantool/go-discovery"
 	"github.com/tarantool/go-tarantool/v2"
@@ -39,21 +36,16 @@ func (f *NetDialerFactory) NewDialer(
 			fmt.Errorf("%s instance URI list is empty", instance.Name)
 	}
 
-	// First look for unix-socket URI.
-	var uri string
-	if uriIndex := slices.IndexFunc(instance.URI, func(uri string) bool {
-		return strings.HasPrefix(uri, "unix://") ||
-			strings.HasPrefix(uri, "unix:") ||
-			strings.HasPrefix(uri, "unix/:")
-	}); uriIndex == -1 {
-		uri = instance.URI[0]
-	} else {
-		uri = instance.URI[uriIndex]
+	var dialers []tarantool.Dialer
+	for _, uri := range instance.URI {
+		dialers = append(dialers, &tarantool.NetDialer{
+			Address:  uri,
+			User:     f.username,
+			Password: f.password,
+		})
 	}
 
-	return &tarantool.NetDialer{
-		Address:  uri,
-		User:     f.username,
-		Password: f.password,
+	return CompositeDialer{
+		Dialers: dialers,
 	}, f.opts, nil
 }
