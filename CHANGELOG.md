@@ -10,6 +10,17 @@ Versioning](http://semver.org/spec/v2.0.0.html) except to the first release.
 
 ### Added
 
+### Changed
+
+### Fixed
+
+## [v0.3.0] - 2024-06-18
+
+The release adds support for the canonical `labels` configuration path. It
+fixes the connection URI selection algorithm.
+
+### Added
+
 * Field `Instance.Labels` is a map that contains data from the `labels`
   configuration path (#34). This field is a replacement for `Instance.AppTags`
   and `Instance.RolesTags`.
