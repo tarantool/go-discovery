@@ -5,6 +5,10 @@ on:
   pull_request:
   workflow_dispatch:
 
+env:
+  # Note: Use exactly match version of tool, to avoid unexpected issues with test on CI.
+  GO_VERSION: '1.22.11'
+
 jobs:
   golangci-lint:
     # We want to run on external PRs, but not on our own internal
@@ -24,12 +28,6 @@ jobs:
     container:
       image: ubuntu:22.04
 
-    strategy:
-      fail-fast: false
-      matrix:
-        golang:
-          - '1.20'
-
     steps:
     - uses: actions/checkout@v3
 
@@ -43,7 +41,7 @@ jobs:
 
     - uses: actions/setup-go@v3
       with:
-        go-version: ${{ matrix.golang }}
+        go-version: ${{ env.GO_VERSION }}
 
     - run: go mod tidy
 
@@ -130,7 +128,7 @@ jobs:
 
     - uses: actions/setup-go@v3
       with:
-        go-version: '1.20'
+        go-version: ${{ env.GO_VERSION }}
 
     - name: Setup generators
       run: |
