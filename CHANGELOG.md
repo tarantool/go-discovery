@@ -10,6 +10,8 @@ Versioning](http://semver.org/spec/v2.0.0.html) except to the first release.
 
 ### Added
 
+* Add discoverer for Tarantool centralized storage.
+
 ### Changed
 
 ### Fixed
@@ -98,7 +100,7 @@ The initial release of the library. The main features:
   * `EtcdWatch` scheduler allows to schedule events due to updates in etcd.
 * `subscriber` subpackage with a set of types to subscribe to new update
   instances configurations events.
-  * `Schedule` subscriber combains scheduler and discoverer to generate update
+  * `Schedule` subscriber combine scheduler and discoverer to generate update
     the events stream.
   * `Filter` subscriber allows to filter an update events stream due to
     instance configuration.
