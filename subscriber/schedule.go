@@ -47,7 +47,7 @@ func NewSchedule(scheduler discovery.Scheduler,
 	}
 }
 
-func compareInstances(old, new []discovery.Instance) []discovery.Event {
+func compareInstances(old, newInst []discovery.Instance) []discovery.Event {
 	var events []discovery.Event
 	instMap := make(map[string]discovery.Instance)
 
@@ -55,7 +55,7 @@ func compareInstances(old, new []discovery.Instance) []discovery.Event {
 		instMap[inst.Name] = inst
 	}
 
-	for _, inst := range new {
+	for _, inst := range newInst {
 		if oldInst, ok := instMap[inst.Name]; ok {
 			if !reflect.DeepEqual(oldInst, inst) {
 				events = append(events, discovery.Event{
