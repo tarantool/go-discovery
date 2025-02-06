@@ -42,65 +42,65 @@ func getInstanceName(event discovery.Event) string {
 	}
 }
 
-func reduceAdd(old, new discovery.Event) (discovery.Event, bool) {
-	switch new.Type {
+func reduceAdd(old, newEv discovery.Event) (discovery.Event, bool) {
+	switch newEv.Type {
 	case discovery.EventTypeRemove:
 		return discovery.Event{}, true
 	case discovery.EventTypeUpdate:
 		return discovery.Event{
 			Type: discovery.EventTypeAdd,
-			New:  new.New,
+			New:  newEv.New,
 		}, false
 	default:
 		return old, false
 	}
 }
 
-func reduceRemove(old, new discovery.Event) (discovery.Event, bool) {
-	switch new.Type {
+func reduceRemove(old, newEv discovery.Event) (discovery.Event, bool) {
+	switch newEv.Type {
 	case discovery.EventTypeAdd:
-		if reflect.DeepEqual(old.Old, new.New) {
+		if reflect.DeepEqual(old.Old, newEv.New) {
 			return discovery.Event{}, true
 		}
 		return discovery.Event{
 			Type: discovery.EventTypeUpdate,
 			Old:  old.Old,
-			New:  new.New,
+			New:  newEv.New,
 		}, false
 	default:
 		return old, false
 	}
 }
 
-func reduceUpdate(old, new discovery.Event) (discovery.Event, bool) {
-	switch new.Type {
+func reduceUpdate(old, newEv discovery.Event) (discovery.Event, bool) {
+	switch newEv.Type {
 	case discovery.EventTypeRemove:
 		return discovery.Event{
 			Type: discovery.EventTypeRemove,
 			Old:  old.Old,
 		}, false
 	case discovery.EventTypeUpdate:
-		if reflect.DeepEqual(old.Old, new.New) {
+		if reflect.DeepEqual(old.Old, newEv.New) {
 			return discovery.Event{}, true
 		}
 		return discovery.Event{
 			Type: discovery.EventTypeUpdate,
 			Old:  old.Old,
-			New:  new.New,
+			New:  newEv.New,
 		}, false
 	default:
 		return old, false
 	}
 }
 
-func reduceEvent(old, new discovery.Event) (discovery.Event, bool) {
+func reduceEvent(old, newEv discovery.Event) (discovery.Event, bool) {
 	switch old.Type {
 	case discovery.EventTypeAdd:
-		return reduceAdd(old, new)
+		return reduceAdd(old, newEv)
 	case discovery.EventTypeRemove:
-		return reduceRemove(old, new)
+		return reduceRemove(old, newEv)
 	case discovery.EventTypeUpdate:
-		return reduceUpdate(old, new)
+		return reduceUpdate(old, newEv)
 	}
 	return old, false
 }
