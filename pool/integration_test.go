@@ -195,7 +195,7 @@ func waitInstances(t testing.TB,
 	}
 }
 
-func startPool(t testing.TB) []test_helpers.TarantoolInstance {
+func startPool(t testing.TB) []*test_helpers.TarantoolInstance {
 	waitStart := 100 * time.Millisecond
 	connectRetry := 10
 	retryTimeout := 500 * time.Millisecond
@@ -221,7 +221,7 @@ func startPool(t testing.TB) []test_helpers.TarantoolInstance {
 	return instances
 }
 
-func stopPool(_ testing.TB, instances []test_helpers.TarantoolInstance) {
+func stopPool(_ testing.TB, instances []*test_helpers.TarantoolInstance) {
 	test_helpers.StopTarantoolInstances(instances)
 }
 
@@ -361,7 +361,7 @@ func TestPool_stop_and_start_instances(t *testing.T) {
 
 	// And start it again.
 	for i := range ttInstances[:3] {
-		err := test_helpers.RestartTarantool(&ttInstances[i])
+		err := test_helpers.RestartTarantool(ttInstances[i])
 		require.NoError(t, err)
 	}
 	// Don't forget to restore roles, here we also ensure that the pool
