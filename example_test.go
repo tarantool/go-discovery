@@ -29,7 +29,7 @@ func init() {
 	log.SetOutput(io.Discard)
 }
 
-func exampleStartTarantool(address string) (test_helpers.TarantoolInstance, error) {
+func exampleStartTarantool(address string) (*test_helpers.TarantoolInstance, error) {
 	dialer := tarantool.NetDialer{
 		Address:  address,
 		User:     "testuser",
@@ -44,15 +44,10 @@ func exampleStartTarantool(address string) (test_helpers.TarantoolInstance, erro
 		RetryTimeout: 500 * time.Millisecond,
 	}
 
-	inst, err := test_helpers.StartTarantool(startOpts)
-	if err != nil {
-		exampleStopTarantool(inst)
-		return inst, err
-	}
-	return inst, nil
+	return test_helpers.StartTarantool(startOpts)
 }
 
-func exampleStopTarantool(instance test_helpers.TarantoolInstance) {
+func exampleStopTarantool(instance *test_helpers.TarantoolInstance) {
 	test_helpers.StopTarantoolWithCleanup(instance)
 }
 

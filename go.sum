@@ -176,8 +176,8 @@ github.com/stretchr/testify v1.9.0 h1:HtqpIVDClZ4nwg75+f6Lvsy/wHu+3BoSGCbBAcpTsT
 github.com/stretchr/testify v1.9.0/go.mod h1:r2ic/lqez/lEtzL7wO/rwa5dbSLXVDPFyf8C91i36aY=
 github.com/tarantool/go-iproto v1.1.0 h1:HULVOIHsiehI+FnHfM7wMDntuzUddO09DKqu2WnFQ5A=
 github.com/tarantool/go-iproto v1.1.0/go.mod h1:LNCtdyZxojUed8SbOiYHoc3v9NvaZTB7p96hUySMlIo=
-github.com/tarantool/go-tarantool/v2 v2.2.1 h1:ldzMVfkmTuJl4ie3ByMIr+mmPSKDVTcSkN8XlVZEows=
-github.com/tarantool/go-tarantool/v2 v2.2.1/go.mod h1:hKKeZeCP8Y8+U6ZFS32ot1jHV/n4WKVP4fjRAvQznMY=
+github.com/tarantool/go-tarantool/v2 v2.3.0 h1:oLEWqQ5rQGT05JdSPaKXNSJyqCXTN7oDWgS11WPlAgk=
+github.com/tarantool/go-tarantool/v2 v2.3.0/go.mod h1:hKKeZeCP8Y8+U6ZFS32ot1jHV/n4WKVP4fjRAvQznMY=
 github.com/tarantool/tt/lib/cluster v0.0.0-20250206114446-4867aad345e1 h1:nzDgY2R963qErLNc+12b9qktb1gWC/MWcOrZtU8Uxl0=
 github.com/tarantool/tt/lib/cluster v0.0.0-20250206114446-4867aad345e1/go.mod h1:cc8kc8Bp8m6wxvQonvGppqPkNuyV9n6fgzDpTbHiwmc=
 github.com/tmc/grpc-websocket-proxy v0.0.0-20201229170055-e5319fda7802 h1:uruHq4dN7GR16kFc5fp3d1RIYzJW5onx8Ybykw2YQFA=
