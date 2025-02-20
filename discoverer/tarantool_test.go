@@ -104,32 +104,6 @@ func TestTarantool_TarantoolGetter_return_error(t *testing.T) {
 	assert.ErrorContains(t, err, "any")
 }
 
-/* FIXME: Can't do such test due to no way endless repeating `DeadlineExceeded` error.
-func TestTarantool_TarantoolGetter_return_deadline_error_retry(t *testing.T) {
-	doer := test_helpers.NewMockDoer(t,
-		fmt.Errorf("any: %w", context.DeadlineExceeded),
-		fmt.Errorf("any: %w", context.DeadlineExceeded),
-		//Q: How many times will the response be repeated?
-	)
-
-	tnt := discoverer.NewTarantool(&doer, "foo")
-	require.NotNil(t, tnt)
-
-	duration := 500 * time.Millisecond
-	ctx, cancel := context.WithTimeout(context.Background(), duration)
-	defer cancel()
-
-	before := time.Now()
-	instances, err := tnt.Discovery(ctx)
-	now := time.Now()
-
-	assert.Nil(t, instances)
-	assert.Greater(t, doer.Requests, 1)
-	assert.ErrorIs(t, err, context.DeadlineExceeded)
-	assert.InDelta(t, now.Sub(before), duration, float64(100*time.Millisecond))
-}
-.*/
-
 func TestTarantool_Discovery_invalid_data(t *testing.T) {
 	doer := test_helpers.NewMockDoer(t,
 		test_helpers.NewMockResponse(t, makeSingleResponseData("- foo\n2")))
