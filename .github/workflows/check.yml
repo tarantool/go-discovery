@@ -29,7 +29,7 @@ jobs:
       image: ubuntu:22.04
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
     - name: Setup requirements
       run: |
@@ -39,7 +39,7 @@ jobs:
           ca-certificates
         update-ca-certificates
 
-    - uses: actions/setup-go@v3
+    - uses: actions/setup-go@v4
       with:
         go-version: ${{ env.GO_VERSION }}
 
@@ -49,7 +49,7 @@ jobs:
     # release v2.0.0
 
     - name: golangci-lint
-      uses: golangci/golangci-lint-action@v3
+      uses: golangci/golangci-lint-action@v4
       continue-on-error: true
       with:
         args: >
@@ -58,7 +58,7 @@ jobs:
           --timeout=5m
 
     - name: golangci-lint
-      uses: golangci/golangci-lint-action@v3
+      uses: golangci/golangci-lint-action@v4
       with:
         # The second run is for human-readable error format with a file name
         # and a line number.
@@ -80,7 +80,7 @@ jobs:
       image: ubuntu:22.04
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
     - name: Setup requirements
       run: |
@@ -124,9 +124,9 @@ jobs:
           make
         update-ca-certificates
 
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
-    - uses: actions/setup-go@v3
+    - uses: actions/setup-go@v4
       with:
         go-version: ${{ env.GO_VERSION }}
 
