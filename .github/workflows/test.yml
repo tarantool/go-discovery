@@ -3,7 +3,10 @@ name: testing
 on:
   push:
   pull_request:
+    types: [synchronize, labeled]
   workflow_dispatch:
+  pull_request_target:
+    types: [labeled]
 
 jobs:
   tests:
@@ -16,7 +19,7 @@ jobs:
     # Also we want to run it always for manually triggered workflows.
     if: (github.event_name == 'push') ||
       (github.event_name == 'pull_request' &&
-        github.event.pull_request.head.repo.full_name != github.repository) ||
+       github.event.pull_request.head.repo.full_name != github.repository) ||
       (github.event_name == 'workflow_dispatch')
 
     runs-on: [ self-hosted, Linux, x86_64, regular ]
@@ -35,7 +38,7 @@ jobs:
           - 'master'
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
     - name: Setup requirements
       run: |
@@ -78,7 +81,7 @@ jobs:
 
     - name: Get Tarantool ${{ matrix.tarantool }} from cache
       id: cache-tarantool
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: ${{ github.workspace }}/bin
         key: cache-tarantool-${{ env.VERSION }}
@@ -93,7 +96,7 @@ jobs:
       run: echo "${GITHUB_WORKSPACE}/bin" >> $GITHUB_PATH
 
     - name: Setup golang ${{ matrix.golang }}
-      uses: actions/setup-go@v3
+      uses: actions/setup-go@v4
       with:
         go-version: ${{ matrix.golang }}
 
@@ -105,3 +108,47 @@ jobs:
 
     - name: Run tests with a race detector
       run: make testrace TAGS=go_tarantool_ssl_disable
+
+  full-ci-tests:
+    if: |
+      (github.event_name == 'push') ||
+      (github.event_name == 'pull_request' &&
+        github.event.action == 'labeled' &&
+        github.event.label.name == 'full-ci') ||
+      (github.event_name == 'pull_request' &&
+        github.event.action == 'synchronize' &&
+        contains(github.event.pull_request.labels.*.name, 'full-ci'))
+    runs-on: ubuntu-22.04
+    strategy:
+      matrix:
+        golang:
+          - "1.22.11"
+        sdk-version:
+          - "3.3.1-0-r52.linux.x86_64"
+      fail-fast: false
+    steps:
+      # `ref` as merge request is needed for pull_request_target because this
+      # target runs in the context of the base commit of the pull request.
+      - uses: actions/checkout@v4
+        if: github.event_name == 'pull_request_target'
+        with:
+          fetch-depth: 0
+          submodules: recursive
+          ref: ${{ github.event.pull_request.head.sha }}
+
+      - uses: actions/checkout@v4
+        if: github.event_name != 'pull_request_target'
+        with:
+          fetch-depth: 0
+          submodules: recursive
+
+      - name: Prepare EE env
+        uses: ./.github/actions/prepare-ee-test-env
+        with:
+          sdk-download-token: "${{ secrets.SDK_DOWNLOAD_TOKEN }}"
+
+      - name: Run tests
+        run: make test
+
+      - name: Run tests with a race detector
+        run: make testrace
