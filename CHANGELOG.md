@@ -10,11 +10,17 @@ Versioning](http://semver.org/spec/v2.0.0.html) except to the first release.
 
 ### Added
 
-* Add discoverer for Tarantool centralized storage.
-
 ### Changed
 
 ### Fixed
+
+## [v0.4.0] - 2025-04-14
+
+The release introduces a discoverer for Tarantool centralized storage.
+
+### Added
+
+* Add discoverer for Tarantool centralized storage (#48).
 
 ## [v0.3.0] - 2024-06-18
 
