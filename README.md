@@ -1,5 +1,14 @@
 # discovery
 
+> [!CAUTION]
+> Attention! The repository has moved to the corporate GitLab.
+>
+> New address: [https://gitlab.corp.mail.ru/tarantool/go-discovery](https://gitlab.corp.mail.ru/tarantool/go-discovery)
+
+> [!CAUTION]
+> Attention! Issues and bug reports should be created in Jira under the TNTP project.
+> The issue must include the `Tarantool Modules` component.
+
 Package discovery implements cluster discovery helpers for Tarantool 3.0
 implemented in Go language according to the [design document][design-document].
 
