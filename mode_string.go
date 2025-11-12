@@ -18,8 +18,9 @@ const _Mode_name = "anyrorw"
 var _Mode_index = [...]uint8{0, 3, 5, 7}
 
 func (i Mode) String() string {
-	if i < 0 || i >= Mode(len(_Mode_index)-1) {
+	idx := int(i) - 0
+	if i < 0 || idx >= len(_Mode_index)-1 {
 		return "Mode(" + strconv.FormatInt(int64(i), 10) + ")"
 	}
-	return _Mode_name[_Mode_index[i]:_Mode_index[i+1]]
+	return _Mode_name[_Mode_index[idx]:_Mode_index[idx+1]]
 }
