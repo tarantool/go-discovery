@@ -18,8 +18,9 @@ const _EventType_name = "addupdateremove"
 var _EventType_index = [...]uint8{0, 3, 9, 15}
 
 func (i EventType) String() string {
-	if i < 0 || i >= EventType(len(_EventType_index)-1) {
+	idx := int(i) - 0
+	if i < 0 || idx >= len(_EventType_index)-1 {
 		return "EventType(" + strconv.FormatInt(int64(i), 10) + ")"
 	}
-	return _EventType_name[_EventType_index[i]:_EventType_index[i+1]]
+	return _EventType_name[_EventType_index[idx]:_EventType_index[idx+1]]
 }
