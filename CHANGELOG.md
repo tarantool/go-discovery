@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 and this project adheres to [Semantic
 Versioning](http://semver.org/spec/v2.0.0.html) except to the first release.
 
@@ -14,80 +14,17 @@ Versioning](http://semver.org/spec/v2.0.0.html) except to the first release.
 
 ### Fixed
 
-## [v0.4.0] - 2025-04-14
+## [v1.0.0] - 2026-02-06
 
-The release introduces a discoverer for Tarantool centralized storage.
+The first public release includes etcd and TcS support. Main features:
 
-### Added
-
-* Add discoverer for Tarantool centralized storage (#48).
-
-## [v0.3.0] - 2024-06-18
-
-The release adds support for the canonical `labels` configuration path. It
-fixes the connection URI selection algorithm.
-
-### Added
-
-* Field `Instance.Labels` is a map that contains data from the `labels`
-  configuration path (#34). This field is a replacement for `Instance.AppTags`
-  and `Instance.RolesTags`.
-* Filter `LabelsContain` for filtering instance by labels (#34).
-* Dialer type `CompositeDialer` to make it easier to create your own dialer
-  factories to dial to each URI one by one (#45).
-
-### Changed
-
-* Filter `RolesContains` renamed to `RolesContain` (#34).
-* Filter `RolesContain` returns true if empty (#34).
-* `discoverer.Etcd` uses URIs from `iproto.listen` if no
-  `iproto.advertise.client` (#43).
-* `NetDialerFactory` at now creates a `Dialer` object that dial to each URI
-  one by one until success (#45).
-
-### Removed
-
-* Fields `Instance.AppTags` and `Instance.RolesTags` (#34).
-* Filters `AppTagsContains` and `RolesTagsContains` (#34).
-
-### Fixed
-
-## [v0.2.0] - 2024-04-03
-
-The release adds missed features from RFC and fixes found bugs.
-
-### Added
-
-* `Connectable` discoverer (#4). It returns a list of nodes from the
-  inner discoverer that are available for connection.
-* `Accumulator` observer (#9). It accumulates events and sends them by batches.
-  While one batch is being sent, the other is accumulating.
-* `Connectable` subscriber (#9). It filters the stream of events
-  from the inner Subscriber and isolates from it only nodes available
-  for connection.
-
-### Changed
-
-* `DialerFactory` interface is moved to the main package from the `pool`
-  package (#4).
-* `NetDialerFactory` is moved to the `dial` package from the `pool`
-  package (#4).
-
-### Fixed
-
-* An invalid instance mode in the pool (`ModeRO` instead of `ModeRW` and
-  vice versa) (#9).
-* Unnecessary logging on successful instance removal from a pool (#9).
-
-## [v0.1.0] - 2024-04-03
-
-The initial release of the library. The main features:
-
-* Fetch Tarantool instances configurations from etcd.
-* Create an update instance configuration events stream due to changes in etcd.
+* Fetch Tarantool instances configurations from etcd and Tarantool Config
+  Storage.
+* Create an update instance configuration events stream due to changes in a
+  cluster configuration storage.
 * Filter configurations with a custom set of filters.
 * Create a pool of connections depending on actual cluster configuration in
-  etcd.
+  a cluster configuration storage.
 * All requests from the Go connector `tarantool/go-tarantool` are supported
   (include `tarantool/go-tarantool/crud` requests).
 
@@ -101,15 +38,25 @@ The initial release of the library. The main features:
   * `Etcd` discoverer allows to fetch instance configuration from a cluster
     configuration in etcd.
   * `Filter` discoverer allows to filter a list of instances configurations.
+  * `Connectable` discoverer returns a list of nodes from the inner discoverer
+    that are available for connection.
+  * `Tarantool` discoverer allows to fetch instence configuration from a
+    Tarantool Config Storage.
 * `scheduler` subpackage with a set of schedulers.
   * `Periodic` scheduler allows to schedule events due to a timeout.
   * `EtcdWatch` scheduler allows to schedule events due to updates in etcd.
 * `subscriber` subpackage with a set of types to subscribe to new update
   instances configurations events.
+  * `Connectable` filters the stream of events
+    from the inner Subscriber and isolates from it only nodes available
+    for connection.
   * `Schedule` subscriber combine scheduler and discoverer to generate update
     the events stream.
   * `Filter` subscriber allows to filter an update events stream due to
     instance configuration.
+* `observer` subpackage with a set of observers to observe any update events.
+  * `Accumulator` observer accumulates events and sends them by batches.
+    While one batch is being sent, the other is accumulating.
 * `pool` subpackage with a set of types to create a connection pool.
   * `NetDialerFactory` creates a connection settings to connect to an instance
     without TLS from the instance configuration.
