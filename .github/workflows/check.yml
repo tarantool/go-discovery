@@ -23,23 +23,18 @@ jobs:
         github.event.pull_request.head.repo.full_name != github.repository) ||
       (github.event_name == 'workflow_dispatch')
 
-    runs-on: [ self-hosted, Linux, x86_64, lightweight ]
-
-    container:
-      image: ubuntu:22.04
+    runs-on: ubuntu-24.04
 
     steps:
     - uses: actions/checkout@v4
 
     - name: Setup requirements
       run: |
-        echo "" > /etc/dpkg/dpkg.cfg.d/excludes
-        apt update
-        DEBIAN_FRONTEND=noninteractive apt install -y \
-          ca-certificates
-        update-ca-certificates
+        sudo apt-get update -y
+        sudo apt install -y --no-install-recommends --no-install-suggests ca-certificates
+        sudo update-ca-certificates
 
-    - uses: actions/setup-go@v4
+    - uses: actions/setup-go@v5
       with:
         go-version: ${{ env.GO_VERSION }}
 
@@ -74,24 +69,20 @@ jobs:
         github.event.pull_request.head.repo.full_name != github.repository) ||
       (github.event_name == 'workflow_dispatch')
 
-    runs-on: [ self-hosted, Linux, x86_64, lightweight ]
-
-    container:
-      image: ubuntu:22.04
+    runs-on: ubuntu-24.04
 
     steps:
     - uses: actions/checkout@v4
 
     - name: Setup requirements
       run: |
-        echo "" > /etc/dpkg/dpkg.cfg.d/excludes
-        apt update
-        DEBIAN_FRONTEND=noninteractive apt install -y \
+        sudo apt-get update -y
+        sudo apt install -y --no-install-recommends --no-install-suggests \
           ca-certificates \
           make \
           python3 \
           python3-pip
-        update-ca-certificates
+        sudo update-ca-certificates
 
     - name: Install codespell
       run: make deps_codespell
@@ -105,28 +96,24 @@ jobs:
         github.event.pull_request.head.repo.full_name != github.repository) ||
       (github.event_name == 'workflow_dispatch')
 
-    runs-on: [ self-hosted, Linux, x86_64, lightweight ]
-
-    container:
-      image: ubuntu:22.04
+    runs-on: ubuntu-24.04
 
     steps:
     # We need to install git before checkout to have a .git folder:
     # https://github.com/actions/checkout/issues/335
     - name: Setup requirements
       run: |
-        echo "" > /etc/dpkg/dpkg.cfg.d/excludes
-        apt update
-        DEBIAN_FRONTEND=noninteractive apt install -y \
+        sudo apt-get update -y
+        sudo apt install -y --no-install-recommends --no-install-suggests \
           bash \
           ca-certificates \
           git \
           make
-        update-ca-certificates
+        sudo update-ca-certificates
 
     - uses: actions/checkout@v4
 
-    - uses: actions/setup-go@v4
+    - uses: actions/setup-go@v5
       with:
         go-version: ${{ env.GO_VERSION }}
 
