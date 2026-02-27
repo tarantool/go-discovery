@@ -66,7 +66,7 @@ func Example() {
 	defer cluster.Terminate()
 
 	etcd, err := clientv3.New(clientv3.Config{
-		Endpoints: cluster.EndpointsV3(),
+		Endpoints: cluster.EndpointsGRPC(),
 	})
 	if err != nil {
 		fmt.Println("Unable to start etcd client:", err)
@@ -237,7 +237,7 @@ func Example_subscriber_Schedule_Etcd() {
 	defer cluster.Terminate()
 
 	etcd, err := clientv3.New(clientv3.Config{
-		Endpoints: cluster.EndpointsV3(),
+		Endpoints: cluster.EndpointsGRPC(),
 	})
 	if err != nil {
 		fmt.Println("Unable to start etcd client:", err)
@@ -306,7 +306,7 @@ func Example_subscriber_Schedule_Etcd_canceled() {
 	defer cluster.Terminate()
 
 	etcd, err := clientv3.New(clientv3.Config{
-		Endpoints: cluster.EndpointsV3(),
+		Endpoints: cluster.EndpointsGRPC(),
 	})
 	if err != nil {
 		fmt.Println("Unable to start etcd client:", err)
@@ -338,7 +338,7 @@ func Example_subscriber_Filter() {
 	defer cluster.Terminate()
 
 	etcd, err := clientv3.New(clientv3.Config{
-		Endpoints: cluster.EndpointsV3(),
+		Endpoints: cluster.EndpointsGRPC(),
 	})
 	if err != nil {
 		fmt.Println("Unable to start etcd client:", err)
@@ -434,7 +434,7 @@ func Example_subscriber_Filter_Etcd_canceled() {
 	defer cluster.Terminate()
 
 	etcd, err := clientv3.New(clientv3.Config{
-		Endpoints: cluster.EndpointsV3(),
+		Endpoints: cluster.EndpointsGRPC(),
 	})
 	if err != nil {
 		fmt.Println("Unable to start etcd client:", err)
@@ -482,7 +482,7 @@ func Example_discoverer_Connectable() {
 	defer cluster.Terminate()
 
 	etcd, err := clientv3.New(clientv3.Config{
-		Endpoints: cluster.EndpointsV3(),
+		Endpoints: cluster.EndpointsGRPC(),
 	})
 	if err != nil {
 		fmt.Println("Unable to start etcd client:", err)
@@ -650,7 +650,7 @@ func Example_subscriber_Connectable() {
 	defer cluster.Terminate()
 
 	etcd, err := clientv3.New(clientv3.Config{
-		Endpoints: cluster.EndpointsV3(),
+		Endpoints: cluster.EndpointsGRPC(),
 	})
 	if err != nil {
 		fmt.Println("Unable to start etcd client:", err)

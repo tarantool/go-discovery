@@ -47,7 +47,7 @@ func TestEtcdWatchScheduler_Etcd_Wait(t *testing.T) {
 	defer cluster.Terminate()
 
 	etcd, err := clientv3.New(clientv3.Config{
-		Endpoints: cluster.EndpointsV3(),
+		Endpoints: cluster.EndpointsGRPC(),
 	})
 
 	require.NoError(t, err)
@@ -90,7 +90,7 @@ func TestEtcdWatchScheduler_Etcd_Stop(t *testing.T) {
 	defer cluster.Terminate()
 
 	etcd, err := clientv3.New(clientv3.Config{
-		Endpoints: cluster.EndpointsV3(),
+		Endpoints: cluster.EndpointsGRPC(),
 	})
 	require.NoError(t, err)
 	require.NotNil(t, etcd)
@@ -117,7 +117,7 @@ func TestEtcdWatchScheduler_Etcd_CloseStop(t *testing.T) {
 	defer cluster.Terminate()
 
 	etcd, err := clientv3.New(clientv3.Config{
-		Endpoints: cluster.EndpointsV3(),
+		Endpoints: cluster.EndpointsGRPC(),
 	})
 	require.NoError(t, err)
 	require.NotNil(t, etcd)
@@ -137,7 +137,7 @@ func TestEtcdWatchScheduler_and_EtcdDiscoverer(t *testing.T) {
 	defer cluster.Terminate()
 
 	etcd, err := clientv3.New(clientv3.Config{
-		Endpoints: cluster.EndpointsV3(),
+		Endpoints: cluster.EndpointsGRPC(),
 	})
 	require.NoError(t, err)
 	require.NotNil(t, etcd)
@@ -201,7 +201,7 @@ func TestDiscoverer_Etcd_and_Filter(t *testing.T) {
 	defer cluster.Terminate()
 
 	etcd, err := clientv3.New(clientv3.Config{
-		Endpoints: cluster.EndpointsV3(),
+		Endpoints: cluster.EndpointsGRPC(),
 	})
 	require.NoError(t, err)
 	require.NotNil(t, etcd)
@@ -245,7 +245,7 @@ func TestDiscoverer_Etcd_Connectable(t *testing.T) {
 	defer cluster.Terminate()
 
 	etcd, err := clientv3.New(clientv3.Config{
-		Endpoints: cluster.EndpointsV3(),
+		Endpoints: cluster.EndpointsGRPC(),
 	})
 	require.NoError(t, err)
 	require.NotNil(t, etcd)
@@ -324,7 +324,7 @@ func TestSubscriber_Etcd_Connectable(t *testing.T) {
 	defer cluster.Terminate()
 
 	etcd, err := clientv3.New(clientv3.Config{
-		Endpoints: cluster.EndpointsV3(),
+		Endpoints: cluster.EndpointsGRPC(),
 	})
 	require.NoError(t, err)
 	require.NotNil(t, etcd)
