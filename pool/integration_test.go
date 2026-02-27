@@ -1,6 +1,7 @@
 package pool_test
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"reflect"
@@ -228,7 +229,7 @@ func stopPool(_ testing.TB, instances []*test_helpers.TarantoolInstance) {
 func TestPool_simple(t *testing.T) {
 	defer stopPool(t, startPool(t))
 	roles := []bool{false, true, false, false, true}
-	err := test_helpers.SetClusterRO(dialers, connOpts, roles)
+	err := test_helpers.SetClusterRO(context.Background(), dialers, connOpts, roles)
 	require.NoError(t, err)
 
 	factory := dial.NewNetDialerFactory(user, pass, connOpts)
@@ -266,7 +267,7 @@ func TestPool_simple(t *testing.T) {
 func TestPool_Observe(t *testing.T) {
 	defer stopPool(t, startPool(t))
 	roles := []bool{false, true, false, false, true}
-	err := test_helpers.SetClusterRO(dialers, connOpts, roles)
+	err := test_helpers.SetClusterRO(context.Background(), dialers, connOpts, roles)
 	require.NoError(t, err)
 
 	factory := dial.NewNetDialerFactory(user, pass, connOpts)
@@ -327,7 +328,7 @@ func TestPool_stop_and_start_instances(t *testing.T) {
 	defer stopPool(t, ttInstances)
 
 	roles := []bool{false, true, false, false, true}
-	err := test_helpers.SetClusterRO(dialers, connOpts, roles)
+	err := test_helpers.SetClusterRO(context.Background(), dialers, connOpts, roles)
 	require.NoError(t, err)
 
 	factory := dial.NewNetDialerFactory(user, pass, connOpts)
@@ -366,7 +367,7 @@ func TestPool_stop_and_start_instances(t *testing.T) {
 	}
 	// Don't forget to restore roles, here we also ensure that the pool
 	// could update an instance role.
-	err = test_helpers.SetClusterRO(dialers[:3], connOpts, roles[:3])
+	err = test_helpers.SetClusterRO(context.Background(), dialers[:3], connOpts, roles[:3])
 	require.NoError(t, err)
 
 	waitInstances(t, balancer, instances)
@@ -376,7 +377,7 @@ func TestPool_choose_instance_by_a_balancer(t *testing.T) {
 	defer stopPool(t, startPool(t))
 
 	roles := []bool{false, true, false, false, true}
-	err := test_helpers.SetClusterRO(dialers, connOpts, roles)
+	err := test_helpers.SetClusterRO(context.Background(), dialers, connOpts, roles)
 	require.NoError(t, err)
 
 	factory := dial.NewNetDialerFactory(user, pass, connOpts)
@@ -447,7 +448,7 @@ func TestPool_choose_instance_by_a_balancer(t *testing.T) {
 func TestPool_balancers_concurrent(t *testing.T) {
 	defer stopPool(t, startPool(t))
 	roles := []bool{false, true, false, false, true}
-	err := test_helpers.SetClusterRO(dialers, connOpts, roles)
+	err := test_helpers.SetClusterRO(context.Background(), dialers, connOpts, roles)
 	require.NoError(t, err)
 
 	instances := makeInstances(servers)

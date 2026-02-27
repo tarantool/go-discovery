@@ -86,7 +86,7 @@ func ExampleEtcdWatch_Wait() {
 	defer cluster.Terminate()
 
 	etcd, err := clientv3.New(clientv3.Config{
-		Endpoints: cluster.EndpointsV3(),
+		Endpoints: cluster.EndpointsGRPC(),
 	})
 	if err != nil {
 		fmt.Println("Unable to start etcd client:", err)
@@ -131,7 +131,7 @@ func ExampleEtcdWatch_Stop() {
 	defer cluster.Terminate()
 
 	etcd, err := clientv3.New(clientv3.Config{
-		Endpoints: cluster.EndpointsV3(),
+		Endpoints: cluster.EndpointsGRPC(),
 	})
 	if err != nil {
 		fmt.Println("Unable to start etcd client:", err)
@@ -168,7 +168,7 @@ func ExampleEtcdWatch_Wait_contextCancel() {
 	defer cluster.Terminate()
 
 	etcd, err := clientv3.New(clientv3.Config{
-		Endpoints: cluster.EndpointsV3(),
+		Endpoints: cluster.EndpointsGRPC(),
 	})
 	if err != nil {
 		fmt.Println("Unable to start etcd client:", err)

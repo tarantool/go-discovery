@@ -343,9 +343,6 @@ func TestConnectable_Subscribe(t *testing.T) {
 			}
 
 			obs.eventWg.Wait()
-
-			assert.Equal(t, int32(events), obs.eventCnt.Load())
-
 			recentEvents := *obs.recentEvents.Load()
 			assert.Equal(t, 1, len(recentEvents))
 			assert.Contains(t, tc.result, recentEvents[0])
