@@ -343,9 +343,11 @@ func TestConnectable_Subscribe(t *testing.T) {
 			}
 
 			obs.eventWg.Wait()
-			recentEvents := *obs.recentEvents.Load()
-			assert.Equal(t, 1, len(recentEvents))
-			assert.Contains(t, tc.result, recentEvents[0])
+			allEvents := *obs.allEvents.Load()
+			assert.Equal(t, events, len(allEvents))
+			for _, event := range allEvents {
+				assert.Contains(t, tc.result, event)
+			}
 
 			obs.eventWg.Add(2)
 			connectable.Unsubscribe(obs)

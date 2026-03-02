@@ -38,6 +38,7 @@ func parseConfig(config *cluster.Config) ([]discovery.Instance, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse configuration: %w", err)
 	}
+
 	return convertClusterConfig(cconfig)
 }
 

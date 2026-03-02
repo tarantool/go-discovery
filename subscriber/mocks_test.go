@@ -12,6 +12,8 @@ import (
 type mockObserver struct {
 	eventCnt     atomic.Int32
 	recentEvents atomic.Pointer[[]discovery.Event]
+	allEvents    atomic.Pointer[[]discovery.Event]
+	mu           sync.Mutex
 
 	errCnt    atomic.Int32
 	recentErr error
@@ -24,6 +26,7 @@ type mockObserver struct {
 func newMockObserver() *mockObserver {
 	obs := &mockObserver{}
 	obs.recentEvents.Store(&[]discovery.Event{})
+	obs.allEvents.Store(&[]discovery.Event{})
 	obs.eventWg.Add(1)
 	obs.errWg.Add(1)
 	return obs
@@ -33,6 +36,13 @@ func (o *mockObserver) Observe(events []discovery.Event, err error) {
 	if len(events) > 0 || err == nil {
 		o.eventCnt.Add(1)
 		o.recentEvents.Store(&events)
+
+		o.mu.Lock()
+		currentAll := *o.allEvents.Load()
+		newAll := append(currentAll, events...)
+		o.allEvents.Store(&newAll)
+		o.mu.Unlock()
+
 		if o.needCountEvents {
 			for range events {
 				o.eventWg.Done()
