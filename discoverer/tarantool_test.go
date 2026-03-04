@@ -104,6 +104,23 @@ func TestTarantool_TarantoolGetter_return_error(t *testing.T) {
 	assert.ErrorContains(t, err, "any")
 }
 
+func TestTarantool_Discovery_expired_context(t *testing.T) {
+	doer := test_helpers.NewMockDoer(t, errors.New("any"))
+
+	tnt := discoverer.NewTarantool(&doer, "foo")
+	require.NotNil(t, tnt)
+
+	// Create a context with a deadline in the past.
+	ctx, cancel := context.WithDeadline(context.Background(),
+		time.Now().Add(-time.Second))
+	defer cancel()
+
+	instances, err := tnt.Discovery(ctx)
+	assert.Nil(t, instances)
+	assert.ErrorIs(t, err, context.DeadlineExceeded)
+	assert.Len(t, doer.Requests, 0)
+}
+
 func TestTarantool_Discovery_invalid_data(t *testing.T) {
 	doer := test_helpers.NewMockDoer(t,
 		test_helpers.NewMockResponse(t, makeSingleResponseData("- foo\n2")))

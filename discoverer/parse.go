@@ -10,31 +10,25 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-// checkTimeout calculate left time to processing.
+// checkTimeout calculates the remaining time before the context deadline.
+// If the context has no deadline, a default timeout of 3 seconds is used.
 func checkTimeout(ctx context.Context) (time.Duration, error) {
-	var timeout time.Duration
+	if err := ctx.Err(); err != nil {
+		return 0, err
+	}
 
 	deadline, ok := ctx.Deadline()
-	if ok {
-		now := time.Now()
-		if now.Before(deadline) {
-			timeout = deadline.Sub(now)
-		}
-		// Else the deadline is expired and we will return an error on
-		// a next <-ctx.Done() check.
-	} else {
+	if !ok {
 		// We need to choose some acceptable timeout value. Not too big,
 		// but not too small. 3 seconds looks good for me.
-		timeout = 3 * time.Second
+		return 3 * time.Second, nil
 	}
 
-	select {
-	case <-ctx.Done():
-		return timeout, ctx.Err()
-	default:
+	if timeout := time.Until(deadline); timeout > 0 {
+		return timeout, nil
 	}
 
-	return timeout, nil
+	return 0, context.DeadlineExceeded
 }
 
 // parseConfig parses a cluster configuration and returns instances

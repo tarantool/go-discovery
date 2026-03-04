@@ -125,6 +125,25 @@ func TestEtcd_EtcdGetter_return_deadline_error_retry(t *testing.T) {
 	assert.InDelta(t, now.Sub(before), duration, float64(100*time.Millisecond))
 }
 
+func TestEtcd_Discovery_expired_context(t *testing.T) {
+	mock := etcdGetterMock{
+		Err: fmt.Errorf("any"),
+	}
+
+	etcd := discoverer.NewEtcd(&mock, "foo")
+	require.NotNil(t, etcd)
+
+	// Create a context with a deadline in the past.
+	ctx, cancel := context.WithDeadline(context.Background(),
+		time.Now().Add(-time.Second))
+	defer cancel()
+
+	instances, err := etcd.Discovery(ctx)
+	assert.Nil(t, instances)
+	assert.ErrorIs(t, err, context.DeadlineExceeded)
+	assert.Equal(t, 0, mock.Calls)
+}
+
 func TestEtcd_Discovery_invalid_data(t *testing.T) {
 	mock := etcdGetterMock{
 		Response: &clientv3.GetResponse{
