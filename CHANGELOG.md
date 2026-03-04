@@ -14,6 +14,9 @@ Versioning](http://semver.org/spec/v2.0.0.html) except to the first release.
 
 ### Fixed
 
+* `checkTimeout` race condition between deadline check and context
+  cancellation that could cause Etcd `Discovery` to block indefinitely.
+
 ## [v1.0.0] - 2026-02-06
 
 The first public release includes etcd and TcS support. Main features:
