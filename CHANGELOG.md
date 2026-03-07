@@ -11,7 +11,8 @@ Versioning](http://semver.org/spec/v2.0.0.html) except to the first release.
 ### Added
 
 * `Storage` discoverer allows to fetch instance configuration from a cluster
-  configuration in storage using `go-storage`.
+  configuration in storage using `go-storage` (#56).
+* `Cache` discoverer type that stores the first discovered result (#58).
 
 ### Changed
 
