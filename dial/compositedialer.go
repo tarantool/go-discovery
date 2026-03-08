@@ -1,3 +1,4 @@
+// Package dial implements a dialer for Tarantool 3.0.
 package dial
 
 import (

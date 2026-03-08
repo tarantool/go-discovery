@@ -52,7 +52,7 @@ func TestEtcdWatchScheduler_Etcd_Wait(t *testing.T) {
 
 	require.NoError(t, err)
 	require.NotNil(t, etcd)
-	defer etcd.Close()
+	defer func() { _ = etcd.Close() }()
 
 	scheduler := scheduler.NewEtcdWatch(etcd, "key")
 
@@ -94,7 +94,7 @@ func TestEtcdWatchScheduler_Etcd_Stop(t *testing.T) {
 	})
 	require.NoError(t, err)
 	require.NotNil(t, etcd)
-	defer etcd.Close()
+	defer func() { _ = etcd.Close() }()
 
 	scheduler := scheduler.NewEtcdWatch(etcd, "key")
 
@@ -126,7 +126,7 @@ func TestEtcdWatchScheduler_Etcd_CloseStop(t *testing.T) {
 
 	ctx := context.Background()
 
-	etcd.Close()
+	_ = etcd.Close()
 
 	err = scheduler.Wait(ctx)
 	assert.Equal(t, discovery.ErrSchedulerStopped, err)
@@ -141,7 +141,7 @@ func TestEtcdWatchScheduler_and_EtcdDiscoverer(t *testing.T) {
 	})
 	require.NoError(t, err)
 	require.NotNil(t, etcd)
-	defer etcd.Close()
+	defer func() { _ = etcd.Close() }()
 
 	var wg sync.WaitGroup
 	wg.Add(1)
@@ -205,7 +205,7 @@ func TestDiscoverer_Etcd_and_Filter(t *testing.T) {
 	})
 	require.NoError(t, err)
 	require.NotNil(t, etcd)
-	defer etcd.Close()
+	defer func() { _ = etcd.Close() }()
 
 	_, err = etcd.Put(context.Background(), "/prefix/config/foo", `
 groups:
@@ -249,7 +249,7 @@ func TestDiscoverer_Etcd_Connectable(t *testing.T) {
 	})
 	require.NoError(t, err)
 	require.NotNil(t, etcd)
-	defer etcd.Close()
+	defer func() { _ = etcd.Close() }()
 
 	_, err = etcd.Put(context.Background(), "/prefix/config/foo", `
 groups:
@@ -328,7 +328,7 @@ func TestSubscriber_Etcd_Connectable(t *testing.T) {
 	})
 	require.NoError(t, err)
 	require.NotNil(t, etcd)
-	defer etcd.Close()
+	defer func() { _ = etcd.Close() }()
 
 	connectable := subscriber.NewConnectable(
 		dial.NewNetDialerFactory(ttUsername, ttPassword, opts),

@@ -1,3 +1,4 @@
+// Package discovery implements a discovery for Tarantool 3.0.
 package discovery
 
 import (

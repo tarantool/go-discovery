@@ -105,14 +105,15 @@ func parseInstanceConfig(config *cluster.Config,
 	// Check the mode, see:
 	// https://github.com/tarantool/tarantool/blob/0e86fbdeaff3094c86c419c9a4c2d29b55d322b9/src/box/lua/config/instance_config.lua#L1376
 	instance.Mode = discovery.ModeAny
-	if parsed.Replication.Failover == "" || parsed.Replication.Failover == failoverOff {
+	switch parsed.Replication.Failover {
+	case "", failoverOff:
 		if (parsed.Database.Mode == modeRW) ||
 			(len(replicaset.Instances) == 1 && parsed.Database.Mode == "") {
 			instance.Mode = discovery.ModeRW
 		} else {
 			instance.Mode = discovery.ModeRO
 		}
-	} else if parsed.Replication.Failover == failoverManual {
+	case failoverManual:
 		if instance.Name == parsed.Leader {
 			instance.Mode = discovery.ModeRW
 		} else {

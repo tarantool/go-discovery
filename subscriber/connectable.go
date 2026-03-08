@@ -1,3 +1,4 @@
+// Package subscriber implements a subscriber for Tarantool 3.0.
 package subscriber
 
 import (

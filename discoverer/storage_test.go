@@ -221,7 +221,7 @@ func TestStorage_Discovery_etcd_integration(t *testing.T) {
 		Endpoints: integrationCluster.EndpointsGRPC(),
 	})
 	require.NoError(t, err)
-	defer client.Close()
+	defer func() { _ = client.Close() }()
 
 	driver := etcd.New(client)
 	st := storage.NewStorage(driver)

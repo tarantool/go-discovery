@@ -40,27 +40,12 @@ jobs:
 
     - run: go mod tidy
 
-    # --build-tags go_tarantool_ssl_disable could be removed after go-tarantool
-    # release v2.0.0
-
     - name: golangci-lint
-      uses: golangci/golangci-lint-action@v4
-      continue-on-error: true
+      uses: golangci/golangci-lint-action@v9
       with:
+        version: v2.11.2
         args: >
-          --build-tags go_tarantool_ssl_disable
           --config=.golangci.yml
-          --timeout=5m
-
-    - name: golangci-lint
-      uses: golangci/golangci-lint-action@v4
-      with:
-        # The second run is for human-readable error format with a file name
-        # and a line number.
-        args: >
-          --build-tags go_tarantool_ssl_disable
-          --config=.golangci.yml
-          --out-${NO_FUTURE}format colored-line-number
           --timeout=5m
 
   codespell:

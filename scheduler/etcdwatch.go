@@ -1,3 +1,4 @@
+// Package scheduler implements a scheduler for Tarantool 3.0.
 package scheduler
 
 import (
