@@ -29,7 +29,7 @@ func ExampleEtcd_Discovery() {
 		fmt.Println("Unable to start etcd client:", err)
 		return
 	}
-	defer etcd.Close()
+	defer func() { _ = etcd.Close() }()
 
 	etcddiscoverer := discoverer.NewEtcd(etcd, "foo")
 	instances, err := etcddiscoverer.Discovery(context.Background())
@@ -163,7 +163,7 @@ func ExampleEtcd_Discovery_cancelled() {
 		fmt.Println("Unable to start etcd client:", err)
 		return
 	}
-	defer etcd.Close()
+	defer func() { _ = etcd.Close() }()
 
 	ctx, cancel := context.WithCancel(context.Background())
 	cancel()

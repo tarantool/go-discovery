@@ -1,3 +1,4 @@
+// Package observer implements an observer for Tarantool 3.0.
 package observer
 
 import (

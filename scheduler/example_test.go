@@ -92,7 +92,7 @@ func ExampleEtcdWatch_Wait() {
 		fmt.Println("Unable to start etcd client:", err)
 		return
 	}
-	defer etcd.Close()
+	defer func() { _ = etcd.Close() }()
 
 	scheduler := scheduler.NewEtcdWatch(etcd, "key")
 
@@ -137,7 +137,7 @@ func ExampleEtcdWatch_Stop() {
 		fmt.Println("Unable to start etcd client:", err)
 		return
 	}
-	defer etcd.Close()
+	defer func() { _ = etcd.Close() }()
 
 	scheduler := scheduler.NewEtcdWatch(etcd, "key")
 
@@ -174,7 +174,7 @@ func ExampleEtcdWatch_Wait_contextCancel() {
 		fmt.Println("Unable to start etcd client:", err)
 		return
 	}
-	defer etcd.Close()
+	defer func() { _ = etcd.Close() }()
 
 	scheduler := scheduler.NewEtcdWatch(etcd, "key")
 

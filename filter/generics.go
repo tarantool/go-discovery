@@ -1,3 +1,4 @@
+// Package filter implements filters for Tarantool 3.0 discovery.
 package filter
 
 // isValueInSet returns true if the value presents in the set.

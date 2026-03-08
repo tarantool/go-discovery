@@ -3,6 +3,7 @@ package pool
 
 import "github.com/tarantool/go-discovery"
 
+// Balancer is an interface for pool balancer implementations.
 type Balancer interface {
 	// Add adds an instance to balancer. Returns false if an instance was not added.
 	Add(instance discovery.Instance) error

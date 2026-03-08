@@ -72,7 +72,7 @@ func Example() {
 		fmt.Println("Unable to start etcd client:", err)
 		return
 	}
-	defer etcd.Close()
+	defer func() { _ = etcd.Close() }()
 
 	// And publish a cluster configuration to it.
 	_, err = etcd.Put(context.Background(), "/prefix/config/all", `
@@ -243,7 +243,7 @@ func Example_subscriber_Schedule_Etcd() {
 		fmt.Println("Unable to start etcd client:", err)
 		return
 	}
-	defer etcd.Close()
+	defer func() { _ = etcd.Close() }()
 
 	schedule := subscriber.NewSchedule(scheduler.NewEtcdWatch(etcd, "foo"),
 		discoverer.NewEtcd(etcd, "foo"))
@@ -312,7 +312,7 @@ func Example_subscriber_Schedule_Etcd_canceled() {
 		fmt.Println("Unable to start etcd client:", err)
 		return
 	}
-	defer etcd.Close()
+	defer func() { _ = etcd.Close() }()
 
 	schedule := subscriber.NewSchedule(scheduler.NewEtcdWatch(etcd, "foo"),
 		discoverer.NewEtcd(etcd, "foo"))
@@ -344,7 +344,7 @@ func Example_subscriber_Filter() {
 		fmt.Println("Unable to start etcd client:", err)
 		return
 	}
-	defer etcd.Close()
+	defer func() { _ = etcd.Close() }()
 
 	schedule := subscriber.NewSchedule(scheduler.NewEtcdWatch(etcd, "foo"),
 		discoverer.NewEtcd(etcd, "foo"))
@@ -440,7 +440,7 @@ func Example_subscriber_Filter_Etcd_canceled() {
 		fmt.Println("Unable to start etcd client:", err)
 		return
 	}
-	defer etcd.Close()
+	defer func() { _ = etcd.Close() }()
 
 	schedule := subscriber.NewSchedule(scheduler.NewEtcdWatch(etcd, "foo"),
 		discoverer.NewEtcd(etcd, "foo"))
@@ -488,7 +488,7 @@ func Example_discoverer_Connectable() {
 		fmt.Println("Unable to start etcd client:", err)
 		return
 	}
-	defer etcd.Close()
+	defer func() { _ = etcd.Close() }()
 
 	// And publish a cluster configuration to it.
 	_, err = etcd.Put(context.Background(), "/prefix/config/all", `
@@ -656,7 +656,7 @@ func Example_subscriber_Connectable() {
 		fmt.Println("Unable to start etcd client:", err)
 		return
 	}
-	defer etcd.Close()
+	defer func() { _ = etcd.Close() }()
 
 	// Create a net dialer factory.
 	factory := dial.NewNetDialerFactory("testuser", "testpass",

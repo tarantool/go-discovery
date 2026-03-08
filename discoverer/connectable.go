@@ -1,3 +1,4 @@
+// Package discoverer implements a discoverer for Tarantool 3.0.
 package discoverer
 
 import (
@@ -44,7 +45,7 @@ func checkRunning(ctx context.Context, factory discovery.DialerFactory,
 	if err != nil {
 		return instance, false
 	}
-	defer conn.Close()
+	defer func() { _ = conn.Close() }()
 
 	var data []struct {
 		Ro     bool   `msgpack:"is_ro"`

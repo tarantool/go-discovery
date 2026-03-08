@@ -22,9 +22,10 @@ func TestRRBalancer_AddAndGet(t *testing.T) {
 	mode := discovery.ModeAny
 	instPerMode := 10
 	for i := 0; i < 30; i++ {
-		if i == 10 {
+		switch i {
+		case 10:
 			mode = discovery.ModeRO
-		} else if i == 20 {
+		case 20:
 			mode = discovery.ModeRW
 		}
 		err := rrBalancer.Add(discovery.Instance{
@@ -117,9 +118,10 @@ func TestRRBalancer_RemovingInstances(t *testing.T) {
 	gen := func(n int) string { return fmt.Sprintf("inst_%d", n) }
 	mode := discovery.ModeAny
 	for i := 0; i < 30; i++ {
-		if i == 10 {
+		switch i {
+		case 10:
 			mode = discovery.ModeRO
-		} else if i == 20 {
+		case 20:
 			mode = discovery.ModeRW
 		}
 		err := rrBalancer.Add(discovery.Instance{

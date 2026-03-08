@@ -1,3 +1,4 @@
+// Package buffer implements buffers for a pool container.
 package buffer
 
 import (
