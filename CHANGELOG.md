@@ -10,16 +10,26 @@ Versioning](http://semver.org/spec/v2.0.0.html) except to the first release.
 
 ### Added
 
-* `Storage` discoverer allows to fetch instance configuration from a cluster
-  configuration in storage using `go-storage` (#56).
-* `Cache` discoverer type that stores the first discovered result (#58).
-
 ### Changed
 
 ### Fixed
 
+## [v1.1.0] - 2026-03-17
+
+This release introduces two new discoverers:
+* `Cache` discoverer to store the first discovered result.
+* `Storage` discoverer allows get configuration from go-storage.
+
+### Added
+
+* `Storage` discoverer allows to fetch instance configuration from a cluster
+  configuration in storage using `go-storage` (#56).
+* `Cache` discoverer type that stores the first discovered result (#58).
+
+### Fixed
+
 * `checkTimeout` race condition between deadline check and context
-  cancellation that could cause Etcd `Discovery` to block indefinitely.
+  cancellation that could cause Etcd `Discovery` to block indefinitely (#57).
 
 ## [v1.0.0] - 2026-02-06
 
