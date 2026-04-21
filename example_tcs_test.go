@@ -66,7 +66,7 @@ groups:
 
 	// Create a Connectable discoverer based on the Etcd discoverer.
 	disc := discoverer.NewConnectable(factory,
-		discoverer.NewTarantool(tcs.Doer(), "/prefix"))
+		discoverer.NewTarantool(tcs.Doer().(tarantool.Connector), "/prefix"))
 
 	// Get a list of connectable instances.
 	inst, err := disc.Discovery(context.Background())

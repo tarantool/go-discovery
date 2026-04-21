@@ -258,7 +258,7 @@ func Example_subscriber_Schedule_Etcd() {
 	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	_, err = etcd.Put(ctx, "foo/config/key", `
+	_, err = etcd.Put(ctx, "/foo/config/key", `
 database:
   mode: ro
 groups:
@@ -369,7 +369,7 @@ func Example_subscriber_Filter() {
 	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	_, err = etcd.Put(ctx, "foo/config/key", `
+	_, err = etcd.Put(ctx, "/foo/config/key", `
 database:
   mode: ro
 groups:
@@ -679,7 +679,7 @@ func Example_subscriber_Connectable() {
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
-	_, err = etcd.Put(ctx, "foo/config/key", `
+	_, err = etcd.Put(ctx, "/foo/config/key", `
 groups:
   foo:
     replicasets:

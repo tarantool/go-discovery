@@ -5,17 +5,26 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/tarantool/tt/lib/cluster"
+	"github.com/tarantool/go-discovery"
 	clientv3 "go.etcd.io/etcd/client/v3"
 
-	"github.com/tarantool/go-discovery"
+	"github.com/tarantool/go-storage"
+	etcdstorage "github.com/tarantool/go-storage/driver/etcd"
 )
+
+// EtcdClient is the interface required to create an etcd-backed storage.
+type EtcdClient interface {
+	// Txn creates a new transaction.
+	Txn(ctx context.Context) clientv3.Txn
+	// Watch watches for changes on a key.
+	Watch(ctx context.Context, key string, opts ...clientv3.OpOption) clientv3.WatchChan
+}
 
 // Etcd discovers a list of instance configurations from etcd.
 type Etcd struct {
 	// etcd obtains information from etcd.
-	etcd clientv3.KV
-	// The configuration prefix for etcd.
+	etcd EtcdClient
+	// prefix is the configuration prefix for etcd.
 	prefix string
 }
 
@@ -26,7 +35,7 @@ var ErrMissingEtcd = fmt.Errorf("etcd object is missing")
 // configurations from etcd.
 //
 // The prefix must have the same value as config.etcd.prefix.
-func NewEtcd(etcd clientv3.KV, prefix string) *Etcd {
+func NewEtcd(etcd EtcdClient, prefix string) *Etcd {
 	return &Etcd{
 		etcd:   etcd,
 		prefix: prefix,
@@ -39,6 +48,8 @@ func (d *Etcd) Discovery(ctx context.Context) ([]discovery.Instance, error) {
 		return nil, ErrMissingEtcd
 	}
 
+	st := storage.NewStorage(etcdstorage.New(d.etcd))
+
 	for {
 		timeout, err := checkTimeout(ctx)
 		if err != nil {
@@ -50,9 +61,10 @@ func (d *Etcd) Discovery(ctx context.Context) ([]discovery.Instance, error) {
 		default:
 		}
 
-		dataCollector := cluster.NewEtcdAllCollector(d.etcd, d.prefix, timeout)
-		collector := cluster.NewYamlCollectorDecorator(dataCollector)
-		config, err := collector.Collect()
+		subCtx, cancel := context.WithTimeout(ctx, timeout)
+		instances, err := buildInstances(subCtx, st, d.prefix)
+		cancel()
+
 		if err != nil {
 			if errors.Is(err, context.DeadlineExceeded) {
 				// Too small timeout? We could retry until the main ctx is not
@@ -60,14 +72,9 @@ func (d *Etcd) Discovery(ctx context.Context) ([]discovery.Instance, error) {
 				continue
 			}
 
-			var noConfig cluster.CollectEmptyError
-			if errors.As(err, &noConfig) {
-				return nil, nil
-			}
-
 			return nil, fmt.Errorf("failed to get data from etcd: %w", err)
 		}
 
-		return parseConfig(config)
+		return instances, nil
 	}
 }

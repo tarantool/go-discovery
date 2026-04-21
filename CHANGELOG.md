@@ -12,6 +12,9 @@ Versioning](http://semver.org/spec/v2.0.0.html) except to the first release.
 
 ### Changed
 
+- Replace `tt/lib/cluster` with `go-config` and `go-storage` libraries for
+  configuration parsing and storage backends.
+
 ### Fixed
 
 ## [v1.1.0] - 2026-03-17

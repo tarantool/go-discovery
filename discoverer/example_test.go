@@ -11,6 +11,7 @@ import (
 	"go.etcd.io/etcd/tests/v3/integration"
 
 	"github.com/tarantool/go-discovery/discoverer"
+	"github.com/tarantool/go-tarantool/v2"
 	tcshelper "github.com/tarantool/go-tarantool/v2/test_helpers/tcs"
 )
 
@@ -38,7 +39,7 @@ func ExampleEtcd_Discovery() {
 	fmt.Println("Instances:", instances)
 	fmt.Println("Error:", err)
 
-	_, err = etcd.Put(context.Background(), "foo/config/key", `
+	_, err = etcd.Put(context.Background(), "/foo/config/key", `
 database:
   mode: ro
 groups:
@@ -104,7 +105,7 @@ func ExampleTarantool_Discovery() {
 		}
 		log.Fatalf("Failed to start TcS: %s", err)
 	}
-	discoverer := discoverer.NewTarantool(tcs.Doer(), "/foo")
+	discoverer := discoverer.NewTarantool(tcs.Doer().(tarantool.Connector), "/foo")
 	instances, err := discoverer.Discovery(context.Background())
 
 	fmt.Println("Without keys in the prefix:")

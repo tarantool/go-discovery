@@ -3,12 +3,31 @@ package discoverer
 import (
 	"context"
 	"fmt"
+	"io"
+	"strings"
 	"time"
 
+	"github.com/tarantool/go-config"
+	"github.com/tarantool/go-config/collectors"
+	"github.com/tarantool/go-config/tree"
 	"github.com/tarantool/go-discovery"
-	"github.com/tarantool/tt/lib/cluster"
-	"gopkg.in/yaml.v2"
+	"github.com/tarantool/go-storage"
+	"github.com/tarantool/go-storage/integrity"
+	"gopkg.in/yaml.v3"
 )
+
+// rawBytesMarshaller is a pass-through marshaller for []byte values.
+type rawBytesMarshaller struct{}
+
+// Marshal returns data as-is.
+func (rawBytesMarshaller) Marshal(data []byte) ([]byte, error) {
+	return data, nil
+}
+
+// Unmarshal returns data as-is.
+func (rawBytesMarshaller) Unmarshal(data []byte) ([]byte, error) {
+	return data, nil
+}
 
 // checkTimeout calculates the remaining time before the context deadline.
 // If the context has no deadline, a default timeout of 3 seconds is used.
@@ -31,115 +50,201 @@ func checkTimeout(ctx context.Context) (time.Duration, error) {
 	return 0, context.DeadlineExceeded
 }
 
-// parseConfig parses a cluster configuration and returns instances
-// configuration.
-func parseConfig(config *cluster.Config) ([]discovery.Instance, error) {
-	cconfig, err := cluster.MakeClusterConfig(config)
-	if err != nil {
-		return nil, fmt.Errorf("failed to parse configuration: %w", err)
+// buildInstances retrieves and parses instance configurations from a storage.
+func buildInstances(
+	ctx context.Context,
+	st storage.Storage,
+	prefix string,
+) ([]discovery.Instance, error) {
+	configPrefix := getConfigPrefix(prefix)
+	typed := integrity.NewTypedBuilder[[]byte](st).
+		WithPrefix(configPrefix).
+		WithMarshaller(rawBytesMarshaller{}).
+		Build()
+
+	collector := collectors.NewStorage(typed, "config", yamlFormat{})
+
+	builder := config.NewBuilder()
+	builder = builder.AddCollector(collector)
+	builder = builder.WithInheritance(
+		config.Levels(
+			config.Global,
+			"groups",
+			"replicasets",
+			"instances",
+		),
+	)
+
+	cfg, errs := builder.Build(ctx)
+	if len(errs) > 0 {
+		return nil, fmt.Errorf("failed to build config: %w", errs[0])
 	}
 
-	return convertClusterConfig(cconfig)
-}
+	allConfigs, err := cfg.EffectiveAll()
+	if err != nil {
+		return nil, fmt.Errorf("failed to get effective configs: %w", err)
+	}
 
-func convertClusterConfig(cconfig cluster.ClusterConfig) ([]discovery.Instance, error) {
-	var instances []discovery.Instance
-	for gname, group := range cconfig.Groups {
-		for rname, replicaset := range group.Replicasets {
-			for iname := range replicaset.Instances {
-				iconfig := cluster.Instantiate(cconfig, iname)
+	if len(allConfigs) == 0 {
+		return nil, nil
+	}
 
-				instance, err := parseInstanceConfig(iconfig, replicaset,
-					discovery.Instance{
-						Group:      gname,
-						Replicaset: rname,
-						Name:       iname,
-					})
-				if err != nil {
-					return nil,
-						fmt.Errorf("failed to parse an instance configuration: %w", err)
-				}
-
-				instances = append(instances, instance)
-			}
+	// Count instances per replicaset for mode determination.
+	replicasetCount := make(map[string]int)
+	for key := range allConfigs {
+		parts := strings.Split(key, "/")
+		if len(parts) >= 6 {
+			replicasetCount[parts[1]+"/"+parts[3]]++
 		}
 	}
-	return instances, nil
-}
 
-// parseInstanceConfig parses an instance configuration fields.
-func parseInstanceConfig(config *cluster.Config,
-	replicaset cluster.ReplicasetConfig,
-	instance discovery.Instance) (discovery.Instance, error) {
 	const (
 		failoverOff    = "off"
 		failoverManual = "manual"
 		modeRW         = "rw"
-		modeRO         = "ro"
 	)
-	var parsed struct {
-		Replication struct {
-			Failover string
-		}
-		Database struct {
-			Mode string
-		}
-		Iproto struct {
-			Advertise struct {
-				Client string
-			}
-			Listen []struct {
-				URI string
-			}
-		}
-		Leader string
-		Roles  []string
-		Labels map[string]string
-	}
 
-	if err := yaml.Unmarshal([]byte(config.String()), &parsed); err != nil {
-		return instance,
-			fmt.Errorf("failed to parse configuration: %w", err)
-	}
+	var instances []discovery.Instance
+	for key, instCfg := range allConfigs {
+		parts := strings.Split(key, "/")
+		if len(parts) < 6 {
+			continue
+		}
 
-	// Check the mode, see:
-	// https://github.com/tarantool/tarantool/blob/0e86fbdeaff3094c86c419c9a4c2d29b55d322b9/src/box/lua/config/instance_config.lua#L1376
-	instance.Mode = discovery.ModeAny
-	switch parsed.Replication.Failover {
-	case "", failoverOff:
-		if (parsed.Database.Mode == modeRW) ||
-			(len(replicaset.Instances) == 1 && parsed.Database.Mode == "") {
-			instance.Mode = discovery.ModeRW
+		group := parts[1]
+		replicaset := parts[3]
+		iname := parts[5]
+
+		instance := discovery.Instance{
+			Group:      group,
+			Replicaset: replicaset,
+			Name:       iname,
+		}
+
+		var failover string
+		_, _ = instCfg.Get(config.NewKeyPath("replication/failover"), &failover)
+
+		var mode string
+		_, _ = instCfg.Get(config.NewKeyPath("database/mode"), &mode)
+
+		var leader string
+		_, _ = instCfg.Get(config.NewKeyPath("leader"), &leader)
+
+		gr := group + "/" + replicaset
+		switch failover {
+		case "", failoverOff:
+			if mode == modeRW ||
+				(replicasetCount[gr] == 1 && mode == "") {
+				instance.Mode = discovery.ModeRW
+			} else {
+				instance.Mode = discovery.ModeRO
+			}
+		case failoverManual:
+			if instance.Name == leader {
+				instance.Mode = discovery.ModeRW
+			} else {
+				instance.Mode = discovery.ModeRO
+			}
+		default:
+			instance.Mode = discovery.ModeAny
+		}
+
+		var advertiseClient string
+		if _, err := instCfg.Get(
+			config.NewKeyPath("iproto/advertise/client"), &advertiseClient,
+		); err == nil && advertiseClient != "" {
+			instance.URI = []string{advertiseClient}
 		} else {
-			instance.Mode = discovery.ModeRO
-		}
-	case failoverManual:
-		if instance.Name == parsed.Leader {
-			instance.Mode = discovery.ModeRW
-		} else {
-			instance.Mode = discovery.ModeRO
-		}
-	}
-	// Else Mode = ModeAny.
-
-	// Collect URI.
-	var uri []string
-	if parsed.Iproto.Advertise.Client != "" {
-		uri = append(uri, parsed.Iproto.Advertise.Client)
-	} else {
-		for _, listen := range parsed.Iproto.Listen {
-			if listen.URI != "" {
-				uri = append(uri, listen.URI)
+			var listen []any
+			if _, err := instCfg.Get(
+				config.NewKeyPath("iproto/listen"), &listen,
+			); err == nil {
+				for _, item := range listen {
+					if m, ok := item.(map[string]any); ok {
+						if uri, ok := m["uri"].(string); ok {
+							instance.URI = append(instance.URI, uri)
+						}
+					}
+				}
 			}
 		}
+
+		var roles []string
+		_, _ = instCfg.Get(config.NewKeyPath("roles"), &roles)
+		instance.Roles = roles
+
+		var labels map[string]string
+		_, _ = instCfg.Get(config.NewKeyPath("labels"), &labels)
+		instance.Labels = labels
+
+		instances = append(instances, instance)
 	}
-	instance.URI = uri
 
-	// Roles already parsed.
-	instance.Roles = parsed.Roles
+	return instances, nil
+}
 
-	// Parse tags.
-	instance.Labels = parsed.Labels
+// yamlFormat is a custom YAML format that preserves empty mappings as leaf
+// nodes. It is used to ensure that empty instance configurations (e.g.
+// "inst1: {}") are correctly represented in the configuration tree.
+type yamlFormat struct {
+	data []byte
+}
 
-	return instance, nil
+// Name implements the Format interface.
+func (yamlFormat) Name() string { return "yaml" }
+
+// KeepOrder implements the Format interface.
+func (yamlFormat) KeepOrder() bool { return false }
+
+// From implements the Format interface.
+func (f yamlFormat) From(r io.Reader) collectors.Format {
+	d, _ := io.ReadAll(r)
+	return yamlFormat{data: d}
+}
+
+// Parse implements the Format interface.
+func (f yamlFormat) Parse() (*tree.Node, error) {
+	var m map[string]any
+
+	if err := yaml.Unmarshal(f.data, &m); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal yaml: %w", err)
+	}
+
+	root := tree.New()
+	flattenMapIntoTree(root, config.NewKeyPath(""), m)
+
+	return root, nil
+}
+
+// flattenMapIntoTree recursively inserts map values into a tree.Node. Empty
+// maps are inserted as leaf nodes so that structural keys remain visible.
+func flattenMapIntoTree(
+	node *tree.Node,
+	prefix config.KeyPath,
+	m map[string]any,
+) {
+	if len(m) == 0 {
+		node.Set(prefix, map[string]any{})
+		return
+	}
+
+	for k, v := range m {
+		path := prefix.Append(k)
+
+		switch val := v.(type) {
+		case map[string]any:
+			flattenMapIntoTree(node, path, val)
+		default:
+			node.Set(path, val)
+		}
+	}
+}
+
+// getConfigPrefix returns a full configuration prefix.
+func getConfigPrefix(basePrefix string) string {
+	prefix := strings.TrimRight(basePrefix, "/")
+	if prefix != "" && !strings.HasPrefix(prefix, "/") {
+		prefix = "/" + prefix
+	}
+	return prefix + "/config/"
 }

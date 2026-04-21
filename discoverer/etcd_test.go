@@ -8,6 +8,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"go.etcd.io/etcd/api/v3/etcdserverpb"
 	"go.etcd.io/etcd/api/v3/mvccpb"
 	clientv3 "go.etcd.io/etcd/client/v3"
 
@@ -17,23 +18,62 @@ import (
 
 var _ discovery.Discoverer = discoverer.NewEtcd(nil, "foo")
 
-type etcdGetterMock struct {
-	clientv3.KV
-	Ctx      context.Context
-	Key      string
-	Opts     []clientv3.OpOption
-	Calls    int
-	Response *clientv3.GetResponse
-	Err      error
+type mockTxn struct {
+	cmps    []clientv3.Cmp
+	thenOps []clientv3.Op
+	elseOps []clientv3.Op
+	commit  func() (*clientv3.TxnResponse, error)
 }
 
-func (m *etcdGetterMock) Get(ctx context.Context, key string,
-	opts ...clientv3.OpOption) (*clientv3.GetResponse, error) {
-	m.Calls++
-	m.Ctx = ctx
-	m.Key = key
-	m.Opts = opts
-	return m.Response, m.Err
+func (m *mockTxn) If(cs ...clientv3.Cmp) clientv3.Txn {
+	m.cmps = append(m.cmps, cs...)
+	return m
+}
+
+func (m *mockTxn) Then(ops ...clientv3.Op) clientv3.Txn {
+	m.thenOps = append(m.thenOps, ops...)
+	return m
+}
+
+func (m *mockTxn) Else(ops ...clientv3.Op) clientv3.Txn {
+	m.elseOps = append(m.elseOps, ops...)
+	return m
+}
+
+func (m *mockTxn) Commit() (*clientv3.TxnResponse, error) {
+	return m.commit()
+}
+
+type mockEtcdClient struct {
+	ctx   context.Context
+	txn   *mockTxn
+	calls int
+}
+
+func (m *mockEtcdClient) Txn(ctx context.Context) clientv3.Txn {
+	m.calls++
+	m.ctx = ctx
+	return m.txn
+}
+
+func (m *mockEtcdClient) Watch(_ context.Context, _ string,
+	_ ...clientv3.OpOption) clientv3.WatchChan {
+	return nil
+}
+
+func makeEtcdTxnResponse(kvs []*clientv3.GetResponse) *clientv3.TxnResponse {
+	responses := make([]*etcdserverpb.ResponseOp, 0, len(kvs))
+	for _, getResp := range kvs {
+		responses = append(responses, &etcdserverpb.ResponseOp{
+			Response: &etcdserverpb.ResponseOp_ResponseRange{
+				ResponseRange: (*etcdserverpb.RangeResponse)(getResp),
+			},
+		})
+	}
+	return &clientv3.TxnResponse{
+		Succeeded: true,
+		Responses: responses,
+	}
 }
 
 func TestNewEtcd_missing(t *testing.T) {
@@ -45,36 +85,41 @@ func TestNewEtcd_missing(t *testing.T) {
 	assert.ErrorIs(t, err, discoverer.ErrMissingEtcd)
 }
 
-func TestEtcd_EtcdGetter_call_args(t *testing.T) {
-	mock := etcdGetterMock{
-		Err: fmt.Errorf("any"),
+func TestEtcd_Discovery_call_args(t *testing.T) {
+	txn := &mockTxn{
+		commit: func() (*clientv3.TxnResponse, error) {
+			return nil, fmt.Errorf("any")
+		},
 	}
+	mock := &mockEtcdClient{txn: txn}
 
-	etcd := discoverer.NewEtcd(&mock, "foo")
+	etcd := discoverer.NewEtcd(mock, "foo")
 	require.NotNil(t, etcd)
 
 	instances, err := etcd.Discovery(context.Background())
 	assert.Nil(t, instances)
 	assert.Error(t, err)
 
-	assert.Equal(t, "foo/config/", mock.Key)
-	assert.Len(t, mock.Opts, 1)
+	assert.Equal(t, 1, mock.calls)
 	now := time.Now()
-	deadline, ok := mock.Ctx.Deadline()
+	deadline, ok := mock.ctx.Deadline()
 	require.True(t, ok)
 	require.InDelta(t, deadline.Sub(now), 3*time.Second,
 		float64(100*time.Millisecond))
 }
 
-func TestEtcd_EtcdGetter_ctx_deadline(t *testing.T) {
-	mock := etcdGetterMock{
-		Err: fmt.Errorf("any"),
+func TestEtcd_Discovery_ctx_deadline(t *testing.T) {
+	txn := &mockTxn{
+		commit: func() (*clientv3.TxnResponse, error) {
+			return nil, fmt.Errorf("any")
+		},
 	}
+	mock := &mockEtcdClient{txn: txn}
 
-	etcd := discoverer.NewEtcd(&mock, "foo")
+	etcd := discoverer.NewEtcd(mock, "foo")
 	require.NotNil(t, etcd)
 
-	var duration = time.Second
+	duration := time.Second
 	ctx, cancel := context.WithTimeout(context.Background(), duration)
 	defer cancel()
 	instances, err := etcd.Discovery(ctx)
@@ -82,36 +127,42 @@ func TestEtcd_EtcdGetter_ctx_deadline(t *testing.T) {
 	assert.Error(t, err)
 
 	now := time.Now()
-	deadline, ok := mock.Ctx.Deadline()
+	deadline, ok := mock.ctx.Deadline()
 	require.True(t, ok)
 	require.InDelta(t, deadline.Sub(now), duration,
 		float64(100*time.Millisecond))
 }
 
-func TestEtcd_EtcdGetter_return_error(t *testing.T) {
-	mock := etcdGetterMock{
-		Err: fmt.Errorf("any"),
+func TestEtcd_Discovery_return_error(t *testing.T) {
+	txn := &mockTxn{
+		commit: func() (*clientv3.TxnResponse, error) {
+			return nil, fmt.Errorf("any")
+		},
 	}
+	mock := &mockEtcdClient{txn: txn}
 
-	etcd := discoverer.NewEtcd(&mock, "foo")
+	etcd := discoverer.NewEtcd(mock, "foo")
 	require.NotNil(t, etcd)
 
 	instances, err := etcd.Discovery(context.Background())
 
 	assert.Nil(t, instances)
-	assert.Equal(t, 1, mock.Calls)
+	assert.Equal(t, 1, mock.calls)
 	assert.ErrorContains(t, err, "any")
 }
 
-func TestEtcd_EtcdGetter_return_deadline_error_retry(t *testing.T) {
-	mock := etcdGetterMock{
-		Err: fmt.Errorf("any: %w", context.DeadlineExceeded),
+func TestEtcd_Discovery_deadline_retry(t *testing.T) {
+	txn := &mockTxn{
+		commit: func() (*clientv3.TxnResponse, error) {
+			return nil, fmt.Errorf("any: %w", context.DeadlineExceeded)
+		},
 	}
+	mock := &mockEtcdClient{txn: txn}
 
-	etcd := discoverer.NewEtcd(&mock, "foo")
+	etcd := discoverer.NewEtcd(mock, "foo")
 	require.NotNil(t, etcd)
 
-	var duration = 500 * time.Millisecond
+	duration := 500 * time.Millisecond
 	ctx, cancel := context.WithTimeout(context.Background(), duration)
 	defer cancel()
 
@@ -120,20 +171,22 @@ func TestEtcd_EtcdGetter_return_deadline_error_retry(t *testing.T) {
 	now := time.Now()
 
 	assert.Nil(t, instances)
-	assert.Greater(t, mock.Calls, 1)
+	assert.Greater(t, mock.calls, 1)
 	assert.ErrorIs(t, err, context.DeadlineExceeded)
 	assert.InDelta(t, now.Sub(before), duration, float64(100*time.Millisecond))
 }
 
 func TestEtcd_Discovery_expired_context(t *testing.T) {
-	mock := etcdGetterMock{
-		Err: fmt.Errorf("any"),
+	txn := &mockTxn{
+		commit: func() (*clientv3.TxnResponse, error) {
+			return nil, fmt.Errorf("any")
+		},
 	}
+	mock := &mockEtcdClient{txn: txn}
 
-	etcd := discoverer.NewEtcd(&mock, "foo")
+	etcd := discoverer.NewEtcd(mock, "foo")
 	require.NotNil(t, etcd)
 
-	// Create a context with a deadline in the past.
 	ctx, cancel := context.WithDeadline(context.Background(),
 		time.Now().Add(-time.Second))
 	defer cancel()
@@ -141,47 +194,28 @@ func TestEtcd_Discovery_expired_context(t *testing.T) {
 	instances, err := etcd.Discovery(ctx)
 	assert.Nil(t, instances)
 	assert.ErrorIs(t, err, context.DeadlineExceeded)
-	assert.Equal(t, 0, mock.Calls)
+	assert.Equal(t, 0, mock.calls)
 }
 
 func TestEtcd_Discovery_invalid_data(t *testing.T) {
-	mock := etcdGetterMock{
-		Response: &clientv3.GetResponse{
-			Kvs: []*mvccpb.KeyValue{
-				&mvccpb.KeyValue{
-					Value: []byte("- foo\n2"),
-				},
-			},
+	kvs := []*mvccpb.KeyValue{
+		{Value: []byte("- foo\n2")},
+	}
+	getResp := &clientv3.GetResponse{Kvs: kvs}
+	txn := &mockTxn{
+		commit: func() (*clientv3.TxnResponse, error) {
+			return makeEtcdTxnResponse([]*clientv3.GetResponse{getResp}), nil
 		},
 	}
+	mock := &mockEtcdClient{txn: txn}
 
-	etcd := discoverer.NewEtcd(&mock, "foo")
+	etcd := discoverer.NewEtcd(mock, "foo")
 	require.NotNil(t, etcd)
 
 	instances, err := etcd.Discovery(context.Background())
 
 	assert.Nil(t, instances)
-	assert.ErrorContains(t, err, "failed to decode config")
-}
-
-func TestEtcd_Discovery_invalid_cluster_config(t *testing.T) {
-	mock := etcdGetterMock{
-		Response: &clientv3.GetResponse{
-			Kvs: []*mvccpb.KeyValue{
-				&mvccpb.KeyValue{
-					Value: []byte("foo"),
-				},
-			},
-		},
-	}
-
-	etcd := discoverer.NewEtcd(&mock, "foo")
-	require.NotNil(t, etcd)
-
-	instances, err := etcd.Discovery(context.Background())
-
-	assert.Nil(t, instances)
-	assert.ErrorContains(t, err, "failed to unmarshal ClusterConfig")
+	assert.ErrorContains(t, err, "failed to build config")
 }
 
 func TestEtcd_Discovery(t *testing.T) {
@@ -189,17 +223,21 @@ func TestEtcd_Discovery(t *testing.T) {
 	for _, tc := range cases {
 		t.Run(tc.Name, func(t *testing.T) {
 			var kvs []*mvccpb.KeyValue
-			for _, value := range tc.Values {
-				kvs = append(kvs, &mvccpb.KeyValue{Value: []byte(value)})
+			for i, value := range tc.Values {
+				kvs = append(kvs, &mvccpb.KeyValue{
+					Key:   []byte(fmt.Sprintf("/foo/config/config%d", i)),
+					Value: []byte(value),
+				})
 			}
-
-			mock := etcdGetterMock{
-				Response: &clientv3.GetResponse{
-					Kvs: kvs,
+			getResp := &clientv3.GetResponse{Kvs: kvs}
+			txn := &mockTxn{
+				commit: func() (*clientv3.TxnResponse, error) {
+					return makeEtcdTxnResponse([]*clientv3.GetResponse{getResp}), nil
 				},
 			}
+			mock := &mockEtcdClient{txn: txn}
 
-			etcd := discoverer.NewEtcd(&mock, "foo")
+			etcd := discoverer.NewEtcd(mock, "foo")
 			require.NotNil(t, etcd)
 
 			instances, err := etcd.Discovery(context.Background())

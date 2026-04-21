@@ -10,6 +10,7 @@ import (
 	"github.com/tarantool/go-discovery/dial"
 	"github.com/tarantool/go-discovery/discoverer"
 	"github.com/tarantool/go-discovery/filter"
+	"github.com/tarantool/go-tarantool/v2"
 	"github.com/tarantool/go-tarantool/v2/test_helpers"
 	"github.com/tarantool/go-tarantool/v2/test_helpers/tcs"
 )
@@ -36,7 +37,9 @@ groups:
 `)
 	require.NoError(t, err)
 
-	disc := discoverer.NewFilter(discoverer.NewTarantool(tcs.Doer(), "/prefix"),
+	tntClient := tcs.Doer().(tarantool.Connector)
+	disc := discoverer.NewFilter(
+		discoverer.NewTarantool(tntClient, "/prefix"),
 		filter.NameOneOf{Names: []string{"foo"}})
 
 	instances, err := disc.Discovery(context.Background())
@@ -81,7 +84,7 @@ groups:
 	factory := dial.NewNetDialerFactory(ttUsername, ttPassword, opts)
 
 	disc := discoverer.NewConnectable(factory,
-		discoverer.NewTarantool(tcs.Doer(), "/prefix"))
+		discoverer.NewTarantool(tcs.Doer().(tarantool.Connector), "/prefix"))
 
 	inst, err := disc.Discovery(context.Background())
 	assert.NoError(t, err)
