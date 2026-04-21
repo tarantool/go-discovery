@@ -472,9 +472,9 @@ groups:
 					Roles:      []string{"roles.tqe-orchestrator"},
 					RolesCfg: map[string]any{
 						"roles.tqe-orchestrator": map[string]any{
-							"partitions":        10,
-							"rebalance_timeout": 5,
-							"sync_timeout":      1,
+							"partitions":        int64(10),
+							"rebalance_timeout": float64(5),
+							"sync_timeout":      float64(1),
 						},
 					},
 				},

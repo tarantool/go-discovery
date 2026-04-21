@@ -18,7 +18,7 @@ func init() {
 	log.SetOutput(io.Discard)
 }
 
-func ExampleEtcd_Discovery() {
+func ExampleNewEtcd() {
 	cluster := integration.NewLazyCluster()
 	defer cluster.Terminate()
 
@@ -38,7 +38,7 @@ func ExampleEtcd_Discovery() {
 	fmt.Println("Instances:", instances)
 	fmt.Println("Error:", err)
 
-	_, err = etcd.Put(context.Background(), "foo/config/key", `
+	_, err = etcd.Put(context.Background(), "/foo/config/key", `
 database:
   mode: ro
 groups:
@@ -95,7 +95,7 @@ groups:
 	// Done.
 }
 
-func ExampleTarantool_Discovery() {
+func ExampleNewTarantool() {
 	tcs, err := tcshelper.Start(0)
 	if err != nil {
 		if errors.Is(err, tcshelper.ErrNotSupported) {
@@ -104,7 +104,7 @@ func ExampleTarantool_Discovery() {
 		}
 		log.Fatalf("Failed to start TcS: %s", err)
 	}
-	discoverer := discoverer.NewTarantool(tcs.Doer(), "/foo")
+	discoverer := discoverer.NewTarantool(tcs.Doer().(discoverer.TarantoolClient), "/foo")
 	instances, err := discoverer.Discovery(context.Background())
 
 	fmt.Println("Without keys in the prefix:")
@@ -152,7 +152,7 @@ groups:
 	fmt.Println("Done.")
 }
 
-func ExampleEtcd_Discovery_cancelled() {
+func ExampleNewEtcd_cancelled() {
 	cluster := integration.NewLazyCluster()
 	defer cluster.Terminate()
 

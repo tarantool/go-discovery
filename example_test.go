@@ -245,8 +245,8 @@ func Example_subscriber_Schedule_Etcd() {
 	}
 	defer func() { _ = etcd.Close() }()
 
-	schedule := subscriber.NewSchedule(scheduler.NewEtcdWatch(etcd, "foo"),
-		discoverer.NewEtcd(etcd, "foo"))
+	schedule := subscriber.NewSchedule(scheduler.NewEtcdWatch(etcd, "/foo"),
+		discoverer.NewEtcd(etcd, "/foo"))
 
 	obs := newExampleObserver()
 	obs.wgEvent.Add(2)
@@ -258,7 +258,7 @@ func Example_subscriber_Schedule_Etcd() {
 	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	_, err = etcd.Put(ctx, "foo/config/key", `
+	_, err = etcd.Put(ctx, "/foo/config/key", `
 database:
   mode: ro
 groups:
@@ -314,8 +314,8 @@ func Example_subscriber_Schedule_Etcd_canceled() {
 	}
 	defer func() { _ = etcd.Close() }()
 
-	schedule := subscriber.NewSchedule(scheduler.NewEtcdWatch(etcd, "foo"),
-		discoverer.NewEtcd(etcd, "foo"))
+	schedule := subscriber.NewSchedule(scheduler.NewEtcdWatch(etcd, "/foo"),
+		discoverer.NewEtcd(etcd, "/foo"))
 
 	obs := newExampleObserver()
 
@@ -346,8 +346,8 @@ func Example_subscriber_Filter() {
 	}
 	defer func() { _ = etcd.Close() }()
 
-	schedule := subscriber.NewSchedule(scheduler.NewEtcdWatch(etcd, "foo"),
-		discoverer.NewEtcd(etcd, "foo"))
+	schedule := subscriber.NewSchedule(scheduler.NewEtcdWatch(etcd, "/foo"),
+		discoverer.NewEtcd(etcd, "/foo"))
 
 	filters := []discovery.Filter{
 		discovery.FilterFunc(func(inst discovery.Instance) bool {
@@ -369,7 +369,7 @@ func Example_subscriber_Filter() {
 	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	_, err = etcd.Put(ctx, "foo/config/key", `
+	_, err = etcd.Put(ctx, "/foo/config/key", `
 database:
   mode: ro
 groups:
@@ -442,8 +442,8 @@ func Example_subscriber_Filter_Etcd_canceled() {
 	}
 	defer func() { _ = etcd.Close() }()
 
-	schedule := subscriber.NewSchedule(scheduler.NewEtcdWatch(etcd, "foo"),
-		discoverer.NewEtcd(etcd, "foo"))
+	schedule := subscriber.NewSchedule(scheduler.NewEtcdWatch(etcd, "/foo"),
+		discoverer.NewEtcd(etcd, "/foo"))
 
 	filters := []discovery.Filter{
 		discovery.FilterFunc(func(inst discovery.Instance) bool {
@@ -664,8 +664,8 @@ func Example_subscriber_Connectable() {
 
 	// Create a Connectable subscriber based on the Etcd subscriber.
 	connectable := subscriber.NewConnectable(factory,
-		subscriber.NewSchedule(scheduler.NewEtcdWatch(etcd, "foo"),
-			discoverer.NewEtcd(etcd, "foo")))
+		subscriber.NewSchedule(scheduler.NewEtcdWatch(etcd, "/foo"),
+			discoverer.NewEtcd(etcd, "/foo")))
 
 	obs := newExampleObserver()
 	obs.wgEvent.Add(1)
@@ -679,7 +679,7 @@ func Example_subscriber_Connectable() {
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
-	_, err = etcd.Put(ctx, "foo/config/key", `
+	_, err = etcd.Put(ctx, "/foo/config/key", `
 groups:
   foo:
     replicasets:
