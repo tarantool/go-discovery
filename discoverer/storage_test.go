@@ -3,7 +3,6 @@ package discoverer_test
 import (
 	"context"
 	"fmt"
-	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -17,10 +16,8 @@ import (
 	"github.com/tarantool/go-storage/predicate"
 	"github.com/tarantool/go-storage/tx"
 	"github.com/tarantool/go-storage/watch"
-	"github.com/tarantool/tt/lib/cluster"
 	clientv3 "go.etcd.io/etcd/client/v3"
 	"go.etcd.io/etcd/tests/v3/integration"
-	"gopkg.in/yaml.v3"
 )
 
 // mockTx is a mock implementation of tx.Tx interface.
@@ -182,25 +179,15 @@ func TestStorage_Discovery_range_error(t *testing.T) {
 	instances, err := sd.Discovery(context.Background())
 	require.Error(t, err)
 	assert.Nil(t, instances)
-	assert.ErrorIs(t, err, discoverer.ErrRangeDataFailed)
+	assert.ErrorContains(t, err, "storage error")
 }
 
-func TestStorage_Discovery_parse_config_error(t *testing.T) {
-	invalidConfigYAML := `
-groups:
-  group1:
-    replicasets:
-      repl1:
-        instances:
-          inst1:
-            iproto:
-              listen: "invalid_type_should_be_array"
-`
+func TestStorage_Discovery_invalid_data(t *testing.T) {
 	mock := &mockStorage{
 		data: []kv.KeyValue{
 			{
 				Key:   []byte("/test-prefix/config/config1"),
-				Value: []byte(invalidConfigYAML),
+				Value: []byte("- foo\n2"),
 			},
 		},
 	}
@@ -210,7 +197,34 @@ groups:
 	instances, err := sd.Discovery(context.Background())
 	require.Error(t, err)
 	assert.Nil(t, instances)
-	assert.ErrorIs(t, err, discoverer.ErrParseConfigFailed)
+	assert.ErrorContains(t, err, "failed to unmarshall")
+}
+
+func TestStorage_Discovery_cases(t *testing.T) {
+	cases := getDiscoveryCases()
+	for _, tc := range cases {
+		t.Run(tc.Name, func(t *testing.T) {
+			var data []kv.KeyValue
+			for i, value := range tc.Values {
+				data = append(data, kv.KeyValue{
+					Key:   []byte(fmt.Sprintf("/test-prefix/config/config%d", i)),
+					Value: []byte(value),
+				})
+			}
+
+			mock := &mockStorage{data: data}
+			sd := discoverer.NewStorageDiscoverer(mock, "/test-prefix/")
+
+			instances, err := sd.Discovery(context.Background())
+			if tc.Err != "" {
+				require.Error(t, err)
+				assert.ErrorContains(t, err, tc.Err)
+			} else {
+				require.NoError(t, err)
+				assert.ElementsMatch(t, tc.Expected, instances)
+			}
+		})
+	}
 }
 
 func TestStorage_Discovery_etcd_integration(t *testing.T) {
@@ -228,25 +242,20 @@ func TestStorage_Discovery_etcd_integration(t *testing.T) {
 
 	cases := []struct {
 		name     string
-		configs  map[string]cluster.ClusterConfig
+		configs  map[string]string
 		expected []discovery.Instance
 	}{
 		{
 			name: "single",
-			configs: map[string]cluster.ClusterConfig{
-				"config1": {
-					Groups: map[string]cluster.GroupConfig{
-						"group1": {
-							Replicasets: map[string]cluster.ReplicasetConfig{
-								"repl1": {
-									Instances: map[string]cluster.InstanceConfig{
-										"inst1": {},
-									},
-								},
-							},
-						},
-					},
-				},
+			configs: map[string]string{
+				"config1": `
+groups:
+  group1:
+    replicasets:
+      repl1:
+        instances:
+          inst1: {}
+`,
 			},
 			expected: []discovery.Instance{
 				{
@@ -259,33 +268,23 @@ func TestStorage_Discovery_etcd_integration(t *testing.T) {
 		},
 		{
 			name: "multiple",
-			configs: map[string]cluster.ClusterConfig{
-				"config1": {
-					Groups: map[string]cluster.GroupConfig{
-						"group1": {
-							Replicasets: map[string]cluster.ReplicasetConfig{
-								"repl1": {
-									Instances: map[string]cluster.InstanceConfig{
-										"inst1": {},
-									},
-								},
-							},
-						},
-					},
-				},
-				"config2": {
-					Groups: map[string]cluster.GroupConfig{
-						"group2": {
-							Replicasets: map[string]cluster.ReplicasetConfig{
-								"repl2": {
-									Instances: map[string]cluster.InstanceConfig{
-										"inst2": {},
-									},
-								},
-							},
-						},
-					},
-				},
+			configs: map[string]string{
+				"config1": `
+groups:
+  group1:
+    replicasets:
+      repl1:
+        instances:
+          inst1: {}
+`,
+				"config2": `
+groups:
+  group2:
+    replicasets:
+      repl2:
+        instances:
+          inst2: {}
+`,
 			},
 			expected: []discovery.Instance{
 				{
@@ -307,19 +306,15 @@ func TestStorage_Discovery_etcd_integration(t *testing.T) {
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
 			ctx := context.Background()
-			prefix := fmt.Sprintf("/test-prefix-%s/", tc.name)
+			prefix := fmt.Sprintf("/test-prefix-%s", tc.name)
 
-			// Write configs to etcd.
-			sd := discoverer.NewStorageDiscoverer(st, prefix)
-			for key, cc := range tc.configs {
-				b, err := yaml.Marshal(cc)
-				require.NoError(t, err)
-
-				fullKey := getConfigPrefix(prefix) + key
-				_, err = client.Put(ctx, fullKey, string(b))
+			for key, yamlData := range tc.configs {
+				fullKey := prefix + "/config/" + key
+				_, err = client.Put(ctx, fullKey, yamlData)
 				require.NoError(t, err)
 			}
 
+			sd := discoverer.NewStorageDiscoverer(st, prefix)
 			instances, err := sd.Discovery(ctx)
 			require.NoError(t, err)
 			assert.ElementsMatch(t, tc.expected, instances)
@@ -330,10 +325,4 @@ func TestStorage_Discovery_etcd_integration(t *testing.T) {
 			assert.ElementsMatch(t, tc.expected, instancesEtcd)
 		})
 	}
-}
-
-// getConfigPrefix returns a full configuration prefix.
-func getConfigPrefix(basePrefix string) string {
-	prefix := strings.TrimRight(basePrefix, "/")
-	return fmt.Sprintf("%s/%s/", prefix, "config")
 }
