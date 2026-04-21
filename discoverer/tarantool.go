@@ -1,60 +1,26 @@
 package discoverer
 
 import (
-	"context"
-	"errors"
-	"fmt"
-
-	"github.com/tarantool/go-discovery"
 	"github.com/tarantool/go-tarantool/v2"
-	"github.com/tarantool/tt/lib/cluster"
+
+	"github.com/tarantool/go-storage"
+	tcsstorage "github.com/tarantool/go-storage/driver/tcs"
 )
 
-// Tarantool discovers a list of instance configurations from TcS.
-type Tarantool struct {
-	conn   tarantool.Doer
-	prefix string
+// TarantoolClient is the interface required to create a TCS-backed storage.
+type TarantoolClient interface {
+	tarantool.Doer
+	NewWatcher(key string, callback tarantool.WatchCallback) (tarantool.Watcher, error)
 }
 
-// ErrMissingTarantool for case of wrong initialization.
-var ErrMissingTarantool = errors.New("no Tarantool connector was applied")
-
-// NewTarantool create decorator with Discovery method.
-func NewTarantool(conn tarantool.Doer, prefix string) *Tarantool {
-	return &Tarantool{
-		conn:   conn,
-		prefix: prefix,
+// NewTarantool creates a new discoverer that retrieves instance
+// configurations from a Tarantool Centralized Storage.
+//
+// If conn is nil, the returned discoverer fails with [ErrMissingStorage] on
+// any [Storage.Discovery] call.
+func NewTarantool(conn TarantoolClient, prefix string) *Storage {
+	if conn == nil {
+		return &Storage{prefix: prefix}
 	}
-}
-
-// Discovery retrieves a list of instance configurations from the Storage.
-func (t *Tarantool) Discovery(ctx context.Context) ([]discovery.Instance, error) {
-	if t.conn == nil {
-		return nil, ErrMissingTarantool
-	}
-
-	for {
-		timeout, err := checkTimeout(ctx)
-		if err != nil {
-			return nil, err
-		}
-
-		dataCollector := cluster.NewTarantoolAllCollector(t.conn, t.prefix, timeout)
-		collector := cluster.NewYamlCollectorDecorator(dataCollector)
-		config, err := collector.Collect()
-		if err != nil {
-			if errors.Is(err, context.DeadlineExceeded) {
-				// Too small timeout? We could retry until the main ctx is not expired.
-				continue
-			}
-			var noConfig cluster.CollectEmptyError
-			if errors.As(err, &noConfig) {
-				return nil, nil
-			}
-
-			return nil, fmt.Errorf("failed to get data from tarantool: %w", err)
-		}
-
-		return parseConfig(config)
-	}
+	return NewStorageDiscoverer(storage.NewStorage(tcsstorage.New(conn)), prefix)
 }

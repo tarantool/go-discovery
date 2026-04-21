@@ -12,6 +12,23 @@ Versioning](http://semver.org/spec/v2.0.0.html) except to the first release.
 
 ### Changed
 
+- Replace `tt/lib/cluster` with `go-config` and `go-storage` libraries for
+  configuration parsing and storage backends (#61).
+- `NewEtcd` now requires the `discoverer.EtcdClient` interface instead of
+  `clientv3.KV` and returns `*Storage` instead of `*Etcd` (#61).
+- `NewTarantool` now requires the `discoverer.TarantoolClient` interface
+  instead of `tarantool.Doer` and returns `*Storage` instead of `*Tarantool`
+  (#61).
+- The `Etcd` and `Tarantool` types have been removed; use the `Storage` type
+  instead (#61).
+- `ErrMissingEtcd`, `ErrMissingTarantool`, and `ErrTypedStorageNil` errors have
+  been replaced by `ErrMissingStorage` (#61).
+- Retry logic on `context.DeadlineExceeded` has been removed from the
+  `Storage` discoverer (#61).
+- Configuration key prefixes are now normalized to always include a leading
+  slash (#61).
+- The default deadline limit in 3 seconds is deleted from discoverers (#61).
+
 ### Fixed
 
 ## [v1.2.0] - 2026-05-5
