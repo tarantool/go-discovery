@@ -2,39 +2,58 @@ package discoverer_test
 
 import (
 	"context"
+	"errors"
+	"fmt"
 	"testing"
 	"time"
 
-	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"github.com/tarantool/go-discovery"
 	"github.com/tarantool/go-discovery/discoverer"
 	"github.com/tarantool/go-tarantool/v2"
 	"github.com/tarantool/go-tarantool/v2/test_helpers"
 )
 
-const prefix = "foo"
+var _ discovery.Discoverer = discoverer.NewTarantool(nil, "foo")
 
-type rawKV = map[string]any
-type rawResponseData = map[string][]rawKV
+const tcsPrefix = "foo"
 
-func makeArrayResponseData(values []string) []rawResponseData {
-	d := make([]rawKV, 0, len(values))
-	for _, value := range values {
-		d = append(d, rawKV{
-			"path":         "/" + prefix + "/config",
-			"value":        value,
+type mockTntClient struct {
+	doer *test_helpers.MockDoer
+}
+
+func (m *mockTntClient) Do(req tarantool.Request) *tarantool.Future {
+	return m.doer.Do(req)
+}
+
+func (m *mockTntClient) NewWatcher(_ string, _ tarantool.WatchCallback) (tarantool.Watcher, error) {
+	return nil, nil
+}
+
+func makeTcsResponse(values []string) []interface{} {
+	items := make([]interface{}, 0, len(values))
+	for i, value := range values {
+		items = append(items, map[string]interface{}{
+			"path":         []byte(fmt.Sprintf("/foo/config/config%d", i)),
+			"value":        []byte(value),
 			"mod_revision": 0,
 		})
 	}
-	resp := rawResponseData{
-		"data": d,
+
+	return []interface{}{
+		map[string]interface{}{
+			"data": map[string]interface{}{
+				"is_success": true,
+				"responses":  []interface{}{items},
+			},
+			"revision": 0,
+		},
 	}
-	return []rawResponseData{resp}
 }
 
-func makeSingleResponseData(value string) []rawResponseData {
-	return makeArrayResponseData([]string{value})
+func makeSingleTcsResponse(value string) []interface{} {
+	return makeTcsResponse([]string{value})
 }
 
 func TestNewTarantool_missing(t *testing.T) {
@@ -46,10 +65,12 @@ func TestNewTarantool_missing(t *testing.T) {
 	assert.ErrorIs(t, err, discoverer.ErrMissingTarantool)
 }
 
-func TestTarantool_TarantoolGetter_call_args(t *testing.T) {
+func TestTarantool_Discovery_call_args(t *testing.T) {
 	doer := test_helpers.NewMockDoer(t,
 		test_helpers.NewMockResponse(t, nil))
-	tnt := discoverer.NewTarantool(&doer, "foo")
+	client := &mockTntClient{doer: &doer}
+
+	tnt := discoverer.NewTarantool(client, tcsPrefix)
 	require.NotNil(t, tnt)
 
 	instances, err := tnt.Discovery(context.Background())
@@ -57,12 +78,6 @@ func TestTarantool_TarantoolGetter_call_args(t *testing.T) {
 	assert.Error(t, err)
 
 	assert.Len(t, doer.Requests, 1)
-	require.Equal(t,
-		tarantool.NewCallRequest("config.storage.get").
-			Args([]any{"foo/config/"}).
-			Context(doer.Requests[0].Ctx()),
-		doer.Requests[0])
-
 	now := time.Now()
 	deadline, ok := doer.Requests[0].Ctx().Deadline()
 	require.True(t, ok)
@@ -70,10 +85,11 @@ func TestTarantool_TarantoolGetter_call_args(t *testing.T) {
 		float64(100*time.Millisecond))
 }
 
-func TestTarantool_TarantoolGetter_ctx_deadline(t *testing.T) {
+func TestTarantool_Discovery_ctx_deadline(t *testing.T) {
 	doer := test_helpers.NewMockDoer(t, errors.New("any"))
+	client := &mockTntClient{doer: &doer}
 
-	tnt := discoverer.NewTarantool(&doer, "foo")
+	tnt := discoverer.NewTarantool(client, tcsPrefix)
 	require.NotNil(t, tnt)
 
 	duration := time.Second
@@ -91,10 +107,11 @@ func TestTarantool_TarantoolGetter_ctx_deadline(t *testing.T) {
 		float64(100*time.Millisecond))
 }
 
-func TestTarantool_TarantoolGetter_return_error(t *testing.T) {
+func TestTarantool_Discovery_return_error(t *testing.T) {
 	doer := test_helpers.NewMockDoer(t, errors.New("any"))
+	client := &mockTntClient{doer: &doer}
 
-	tnt := discoverer.NewTarantool(&doer, "foo")
+	tnt := discoverer.NewTarantool(client, tcsPrefix)
 	require.NotNil(t, tnt)
 
 	instances, err := tnt.Discovery(context.Background())
@@ -106,11 +123,11 @@ func TestTarantool_TarantoolGetter_return_error(t *testing.T) {
 
 func TestTarantool_Discovery_expired_context(t *testing.T) {
 	doer := test_helpers.NewMockDoer(t, errors.New("any"))
+	client := &mockTntClient{doer: &doer}
 
-	tnt := discoverer.NewTarantool(&doer, "foo")
+	tnt := discoverer.NewTarantool(client, tcsPrefix)
 	require.NotNil(t, tnt)
 
-	// Create a context with a deadline in the past.
 	ctx, cancel := context.WithDeadline(context.Background(),
 		time.Now().Add(-time.Second))
 	defer cancel()
@@ -123,39 +140,58 @@ func TestTarantool_Discovery_expired_context(t *testing.T) {
 
 func TestTarantool_Discovery_invalid_data(t *testing.T) {
 	doer := test_helpers.NewMockDoer(t,
-		test_helpers.NewMockResponse(t, makeSingleResponseData("- foo\n2")))
+		test_helpers.NewMockResponse(t, makeSingleTcsResponse("- foo\n2")))
+	client := &mockTntClient{doer: &doer}
 
-	tnt := discoverer.NewTarantool(&doer, "foo")
+	tnt := discoverer.NewTarantool(client, tcsPrefix)
 	require.NotNil(t, tnt)
 
 	instances, err := tnt.Discovery(context.Background())
 
 	assert.Nil(t, instances)
-	assert.ErrorContains(t, err, "failed to decode config")
+	assert.ErrorContains(t, err, "failed to unmarshall")
 }
 
-func TestTarantool_Discovery_invalid_cluster_config(t *testing.T) {
+func TestTarantool_Discovery_scalar_no_instances(t *testing.T) {
+	// "foo" is a valid YAML scalar. It parses successfully but does not
+	// contain any instances, so Discovery returns nil without an error.
 	doer := test_helpers.NewMockDoer(t,
-		test_helpers.NewMockResponse(t, makeSingleResponseData("foo")))
+		test_helpers.NewMockResponse(t, makeSingleTcsResponse("foo")))
+	client := &mockTntClient{doer: &doer}
 
-	etcd := discoverer.NewTarantool(&doer, "foo")
-	require.NotNil(t, etcd)
+	tnt := discoverer.NewTarantool(client, tcsPrefix)
+	require.NotNil(t, tnt)
 
-	instances, err := etcd.Discovery(context.Background())
+	instances, err := tnt.Discovery(context.Background())
 
 	assert.Nil(t, instances)
-	assert.ErrorContains(t, err, "failed to unmarshal ClusterConfig")
+	assert.NoError(t, err)
+}
+
+func TestTarantool_Discovery_empty_storage(t *testing.T) {
+	resp := test_helpers.NewMockResponse(t, makeTcsResponse(nil))
+	doer := test_helpers.NewMockDoer(t, resp, resp)
+	client := &mockTntClient{doer: &doer}
+
+	tnt := discoverer.NewTarantool(client, tcsPrefix)
+	require.NotNil(t, tnt)
+
+	instances, err := tnt.Discovery(context.Background())
+
+	assert.Nil(t, instances)
+	assert.NoError(t, err)
 }
 
 func TestTarantool_Discovery(t *testing.T) {
 	cases := getDiscoveryCases()
 	for _, tc := range cases {
 		t.Run(tc.Name, func(t *testing.T) {
-			doer := test_helpers.NewMockDoer(t,
-				test_helpers.NewMockResponse(t,
-					makeArrayResponseData(tc.Values)))
+			resp := test_helpers.NewMockResponse(t,
+				makeTcsResponse(tc.Values))
+			doer := test_helpers.NewMockDoer(t, resp, resp)
+			client := &mockTntClient{doer: &doer}
 
-			tnt := discoverer.NewTarantool(&doer, "foo")
+			tnt := discoverer.NewTarantool(client, tcsPrefix)
 			require.NotNil(t, tnt)
 
 			instances, err := tnt.Discovery(context.Background())

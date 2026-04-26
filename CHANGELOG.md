@@ -12,6 +12,14 @@ Versioning](http://semver.org/spec/v2.0.0.html) except to the first release.
 
 ### Changed
 
+- Replace `tt/lib/cluster` with `go-config` and `go-storage` libraries for
+  configuration parsing and storage backends.
+- `NewEtcd` now requires an `EtcdClient` interface instead of `clientv3.KV`.
+- `NewTarantool` now requires a `TarantoolClient` interface instead of
+  `tarantool.Doer`.
+- Configuration key prefixes are now normalized to always include a leading
+  slash.
+
 ### Fixed
 
 ## [v1.1.0] - 2026-03-17

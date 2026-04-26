@@ -36,7 +36,9 @@ groups:
 `)
 	require.NoError(t, err)
 
-	disc := discoverer.NewFilter(discoverer.NewTarantool(tcs.Doer(), "/prefix"),
+	tntClient := tcs.Doer().(discoverer.TarantoolClient)
+	disc := discoverer.NewFilter(
+		discoverer.NewTarantool(tntClient, "/prefix"),
 		filter.NameOneOf{Names: []string{"foo"}})
 
 	instances, err := disc.Discovery(context.Background())
@@ -81,7 +83,7 @@ groups:
 	factory := dial.NewNetDialerFactory(ttUsername, ttPassword, opts)
 
 	disc := discoverer.NewConnectable(factory,
-		discoverer.NewTarantool(tcs.Doer(), "/prefix"))
+		discoverer.NewTarantool(tcs.Doer().(discoverer.TarantoolClient), "/prefix"))
 
 	inst, err := disc.Discovery(context.Background())
 	assert.NoError(t, err)

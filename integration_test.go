@@ -40,13 +40,18 @@ func startTarantool(t testing.TB) *test_helpers.TarantoolInstance {
 
 	inst, err := test_helpers.StartTarantool(startOpts)
 	if err != nil {
-		stopTarantool(inst)
+		if inst != nil {
+			stopTarantool(inst)
+		}
 		t.Fatalf("Failed to prepare Tarantool: %s", err)
 	}
 	return inst
 }
 
 func stopTarantool(instance *test_helpers.TarantoolInstance) {
+	if instance == nil {
+		return
+	}
 	test_helpers.StopTarantoolWithCleanup(instance)
 }
 

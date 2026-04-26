@@ -38,7 +38,7 @@ func ExampleEtcd_Discovery() {
 	fmt.Println("Instances:", instances)
 	fmt.Println("Error:", err)
 
-	_, err = etcd.Put(context.Background(), "foo/config/key", `
+	_, err = etcd.Put(context.Background(), "/foo/config/key", `
 database:
   mode: ro
 groups:
@@ -104,7 +104,7 @@ func ExampleTarantool_Discovery() {
 		}
 		log.Fatalf("Failed to start TcS: %s", err)
 	}
-	discoverer := discoverer.NewTarantool(tcs.Doer(), "/foo")
+	discoverer := discoverer.NewTarantool(tcs.Doer().(discoverer.TarantoolClient), "/foo")
 	instances, err := discoverer.Discovery(context.Background())
 
 	fmt.Println("Without keys in the prefix:")

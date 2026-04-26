@@ -332,8 +332,8 @@ func TestSubscriber_Etcd_Connectable(t *testing.T) {
 
 	connectable := subscriber.NewConnectable(
 		dial.NewNetDialerFactory(ttUsername, ttPassword, opts),
-		subscriber.NewSchedule(scheduler.NewEtcdWatch(etcd, "foo"),
-			discoverer.NewEtcd(etcd, "foo")))
+		subscriber.NewSchedule(scheduler.NewEtcdWatch(etcd, "/foo"),
+			discoverer.NewEtcd(etcd, "/foo")))
 
 	obs := newMockObserver()
 	obs.wgEvent.Add(1)
@@ -343,7 +343,7 @@ func TestSubscriber_Etcd_Connectable(t *testing.T) {
 	defer connectable.Unsubscribe(obs)
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	_, err = etcd.Put(ctx, "foo/config/key", `
+	_, err = etcd.Put(ctx, "/foo/config/key", `
 groups:
   foo:
     replicasets:
