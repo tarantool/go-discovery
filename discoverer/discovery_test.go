@@ -443,6 +443,51 @@ groups:
 			},
 		},
 		{
+			Name: "roles_cfg",
+			Values: []string{
+				`
+groups:
+  foo:
+    replicasets:
+      bar:
+        instances:
+          zoo:
+            roles:
+            - roles.tqe-orchestrator
+            roles_cfg:
+              roles.tqe-orchestrator:
+                partitions: 10
+                rebalance_timeout: 5.0
+                sync_timeout: 1.0
+          car:
+            roles:
+            - roles.tqe-storage
+`},
+			Expected: []discovery.Instance{
+				{
+					Group:      "foo",
+					Replicaset: "bar",
+					Name:       "zoo",
+					Mode:       discovery.ModeRO,
+					Roles:      []string{"roles.tqe-orchestrator"},
+					RolesCfg: map[string]any{
+						"roles.tqe-orchestrator": map[string]any{
+							"partitions":        10,
+							"rebalance_timeout": 5,
+							"sync_timeout":      1,
+						},
+					},
+				},
+				{
+					Group:      "foo",
+					Replicaset: "bar",
+					Name:       "car",
+					Mode:       discovery.ModeRO,
+					Roles:      []string{"roles.tqe-storage"},
+				},
+			},
+		},
+		{
 			Name: "full set of params",
 			Values: []string{
 				`

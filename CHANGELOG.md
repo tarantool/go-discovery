@@ -10,6 +10,9 @@ Versioning](http://semver.org/spec/v2.0.0.html) except to the first release.
 
 ### Added
 
+* `Instance` now exposes a `RolesCfg` field — a map of role name to its
+  configuration as defined in the `roles_cfg` section of the cluster config.
+
 ### Changed
 
 ### Fixed

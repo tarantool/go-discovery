@@ -16,4 +16,7 @@ type Instance struct {
 	Roles []string
 	// Labels is a map of string labels of the instance.
 	Labels map[string]string
+	// RolesCfg is a map of role name to its configuration, as defined in
+	// the roles_cfg section of the cluster config for this instance.
+	RolesCfg map[string]any
 }

@@ -7,7 +7,7 @@ import (
 
 	"github.com/tarantool/go-discovery"
 	"github.com/tarantool/tt/lib/cluster"
-	"gopkg.in/yaml.v2"
+	"gopkg.in/yaml.v3"
 )
 
 // checkTimeout calculates the remaining time before the context deadline.
@@ -92,9 +92,10 @@ func parseInstanceConfig(config *cluster.Config,
 				URI string
 			}
 		}
-		Leader string
-		Roles  []string
-		Labels map[string]string
+		Leader   string
+		Roles    []string
+		Labels   map[string]string
+		RolesCfg map[string]any `yaml:"roles_cfg"`
 	}
 
 	if err := yaml.Unmarshal([]byte(config.String()), &parsed); err != nil {
@@ -140,6 +141,8 @@ func parseInstanceConfig(config *cluster.Config,
 
 	// Parse tags.
 	instance.Labels = parsed.Labels
+
+	instance.RolesCfg = parsed.RolesCfg
 
 	return instance, nil
 }
