@@ -89,7 +89,7 @@ groups:
 		},
 	}
 
-	sd := discoverer.NewStorageDiscoverer(mock, "/test-prefix/")
+	sd := discoverer.NewStorage(mock, "/test-prefix/")
 
 	instances, err := sd.Discovery(context.Background())
 	require.NoError(t, err)
@@ -135,7 +135,7 @@ groups:
 		},
 	}
 
-	sd := discoverer.NewStorageDiscoverer(mock, "/test-prefix/")
+	sd := discoverer.NewStorage(mock, "/test-prefix/")
 
 	instances, err := sd.Discovery(context.Background())
 	require.NoError(t, err)
@@ -162,7 +162,7 @@ func TestStorage_Discovery_empty_result(t *testing.T) {
 		data: []kv.KeyValue{},
 	}
 
-	sd := discoverer.NewStorageDiscoverer(mock, "/test-prefix/")
+	sd := discoverer.NewStorage(mock, "/test-prefix/")
 
 	instances, err := sd.Discovery(context.Background())
 	require.NoError(t, err)
@@ -174,7 +174,7 @@ func TestStorage_Discovery_range_error(t *testing.T) {
 		err: fmt.Errorf("storage error"),
 	}
 
-	sd := discoverer.NewStorageDiscoverer(mock, "/test-prefix/")
+	sd := discoverer.NewStorage(mock, "/test-prefix/")
 
 	instances, err := sd.Discovery(context.Background())
 	require.Error(t, err)
@@ -192,7 +192,7 @@ func TestStorage_Discovery_invalid_data(t *testing.T) {
 		},
 	}
 
-	sd := discoverer.NewStorageDiscoverer(mock, "/test-prefix/")
+	sd := discoverer.NewStorage(mock, "/test-prefix/")
 
 	instances, err := sd.Discovery(context.Background())
 	require.Error(t, err)
@@ -213,7 +213,7 @@ func TestStorage_Discovery_cases(t *testing.T) {
 			}
 
 			mock := &mockStorage{data: data}
-			sd := discoverer.NewStorageDiscoverer(mock, "/test-prefix/")
+			sd := discoverer.NewStorage(mock, "/test-prefix/")
 
 			instances, err := sd.Discovery(context.Background())
 			if tc.Err != "" {
@@ -314,7 +314,7 @@ groups:
 				require.NoError(t, err)
 			}
 
-			sd := discoverer.NewStorageDiscoverer(st, prefix)
+			sd := discoverer.NewStorage(st, prefix)
 			instances, err := sd.Discovery(ctx)
 			require.NoError(t, err)
 			assert.ElementsMatch(t, tc.expected, instances)

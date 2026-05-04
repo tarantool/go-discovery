@@ -28,6 +28,7 @@ Versioning](http://semver.org/spec/v2.0.0.html) except to the first release.
 - Configuration key prefixes are now normalized to always include a leading
   slash (#61).
 - The default deadline limit in 3 seconds is deleted from discoverers (#61).
+- `NewStorageDiscoverer` has been renamed to `NewStorage` (#61).
 
 ### Fixed
 

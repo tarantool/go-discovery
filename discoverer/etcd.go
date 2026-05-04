@@ -26,5 +26,5 @@ func NewEtcd(etcd EtcdClient, prefix string) *Storage {
 	if etcd == nil {
 		return &Storage{prefix: prefix}
 	}
-	return NewStorageDiscoverer(storage.NewStorage(etcdstorage.New(etcd)), prefix)
+	return NewStorage(storage.NewStorage(etcdstorage.New(etcd)), prefix)
 }
