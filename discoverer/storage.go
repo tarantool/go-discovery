@@ -21,9 +21,9 @@ type Storage struct {
 	prefix string
 }
 
-// NewStorageDiscoverer creates a new storage discoverer to retrieve a list
+// NewStorage creates a new storage discoverer to retrieve a list
 // of instance configurations from a storage.
-func NewStorageDiscoverer(st storage.Storage, prefix string) *Storage {
+func NewStorage(st storage.Storage, prefix string) *Storage {
 	return &Storage{
 		st:     st,
 		prefix: prefix,

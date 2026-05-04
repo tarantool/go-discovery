@@ -22,5 +22,5 @@ func NewTarantool(conn TarantoolClient, prefix string) *Storage {
 	if conn == nil {
 		return &Storage{prefix: prefix}
 	}
-	return NewStorageDiscoverer(storage.NewStorage(tcsstorage.New(conn)), prefix)
+	return NewStorage(storage.NewStorage(tcsstorage.New(conn)), prefix)
 }
