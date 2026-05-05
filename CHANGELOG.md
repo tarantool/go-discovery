@@ -10,12 +10,21 @@ Versioning](http://semver.org/spec/v2.0.0.html) except to the first release.
 
 ### Added
 
-* `Instance` now exposes a `RolesCfg` field — a map of role name to its
-  configuration as defined in the `roles_cfg` section of the cluster config.
-
 ### Changed
 
 ### Fixed
+
+## [v1.2.0] - 2026-05-5
+
+This release introduces updated `Instance` object. From now on it contains
+`roles_cfg` section, this allows callers to read role-specific configuration
+without making additional RPC calls to Tarantool.
+
+### Added
+
+* `Instance` now exposes a `RolesCfg` field — a map of role name to its
+  configuration as defined in the `roles_cfg` section of the cluster config
+  (#62).
 
 ## [v1.1.0] - 2026-03-17
 
