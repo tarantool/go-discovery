@@ -12,6 +12,15 @@ Versioning](http://semver.org/spec/v2.0.0.html) except to the first release.
 
 ### Changed
 
+### Fixed
+
+## [v2.0.0] - 2025-05-06
+
+This release introduces migration from `tt/lib/cluster` to `go-config`
+and `go-storage` libraries.
+
+### Changed
+
 - Replace `tt/lib/cluster` with `go-config` and `go-storage` libraries for
   configuration parsing and storage backends (#61).
 - `NewEtcd` now requires the `discoverer.EtcdClient` interface instead of
@@ -29,8 +38,6 @@ Versioning](http://semver.org/spec/v2.0.0.html) except to the first release.
   slash (#61).
 - The default deadline limit in 3 seconds is deleted from discoverers (#61).
 - `NewStorageDiscoverer` has been renamed to `NewStorage` (#61).
-
-### Fixed
 
 ## [v1.2.0] - 2026-05-5
 
