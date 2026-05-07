@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"reflect"
 
-	"github.com/tarantool/go-discovery"
+	"github.com/tarantool/go-discovery/v2"
 )
 
 type scheduleState struct {

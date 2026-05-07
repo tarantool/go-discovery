@@ -8,8 +8,8 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/tarantool/go-discovery"
-	"github.com/tarantool/go-discovery/scheduler"
+	"github.com/tarantool/go-discovery/v2"
+	"github.com/tarantool/go-discovery/v2/scheduler"
 )
 
 func TestPeriodic_Wait(t *testing.T) {

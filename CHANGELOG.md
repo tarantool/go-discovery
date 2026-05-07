@@ -14,6 +14,10 @@ Versioning](http://semver.org/spec/v2.0.0.html) except to the first release.
 
 ### Fixed
 
+## [v2.0.1] - 2025-05-07
+
+This release introduces updated library name `go-discovery/v2`.
+
 ## [v2.0.0] - 2025-05-06
 
 This release introduces migration from `tt/lib/cluster` to `go-config`

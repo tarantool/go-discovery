@@ -6,10 +6,10 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"github.com/tarantool/go-discovery"
-	"github.com/tarantool/go-discovery/dial"
-	"github.com/tarantool/go-discovery/discoverer"
-	"github.com/tarantool/go-discovery/filter"
+	"github.com/tarantool/go-discovery/v2"
+	"github.com/tarantool/go-discovery/v2/dial"
+	"github.com/tarantool/go-discovery/v2/discoverer"
+	"github.com/tarantool/go-discovery/v2/filter"
 	"github.com/tarantool/go-tarantool/v2/test_helpers"
 	"github.com/tarantool/go-tarantool/v2/test_helpers/tcs"
 )

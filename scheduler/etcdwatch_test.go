@@ -8,8 +8,8 @@ import (
 	"github.com/stretchr/testify/assert"
 	clientv3 "go.etcd.io/etcd/client/v3"
 
-	"github.com/tarantool/go-discovery"
-	"github.com/tarantool/go-discovery/scheduler"
+	"github.com/tarantool/go-discovery/v2"
+	"github.com/tarantool/go-discovery/v2/scheduler"
 )
 
 type mockWatcher struct {

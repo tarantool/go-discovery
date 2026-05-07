@@ -17,9 +17,9 @@ import (
 	"github.com/tarantool/go-iproto"
 	"github.com/tarantool/go-tarantool/v2"
 
-	"github.com/tarantool/go-discovery"
-	"github.com/tarantool/go-discovery/dial"
-	"github.com/tarantool/go-discovery/subscriber"
+	"github.com/tarantool/go-discovery/v2"
+	"github.com/tarantool/go-discovery/v2/dial"
+	"github.com/tarantool/go-discovery/v2/subscriber"
 )
 
 type mockIoConn struct {

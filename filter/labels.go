@@ -1,7 +1,7 @@
 package filter
 
 import (
-	"github.com/tarantool/go-discovery"
+	"github.com/tarantool/go-discovery/v2"
 )
 
 // LabelsContain matches instances that have all application labels from the

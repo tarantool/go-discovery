@@ -10,7 +10,7 @@ import (
 	"github.com/tarantool/go-tarantool/v2"
 	"golang.org/x/exp/slices"
 
-	"github.com/tarantool/go-discovery"
+	"github.com/tarantool/go-discovery/v2"
 )
 
 // Connectable gets a list of nodes from the inner discoverer and returns

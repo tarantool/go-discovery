@@ -3,7 +3,7 @@ package subscriber
 import (
 	"context"
 
-	"github.com/tarantool/go-discovery"
+	"github.com/tarantool/go-discovery/v2"
 )
 
 type filterObserver struct {

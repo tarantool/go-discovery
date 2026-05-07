@@ -9,7 +9,7 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/tarantool/go-discovery"
+	"github.com/tarantool/go-discovery/v2"
 
 	"github.com/tarantool/go-tarantool/v2"
 	ttpool "github.com/tarantool/go-tarantool/v2/pool"

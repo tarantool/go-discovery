@@ -3,7 +3,7 @@ package discoverer_test
 import (
 	"context"
 
-	"github.com/tarantool/go-discovery"
+	"github.com/tarantool/go-discovery/v2"
 )
 
 type mockDiscoverer struct {

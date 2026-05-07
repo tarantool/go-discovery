@@ -9,7 +9,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/tarantool/go-tarantool/v2"
 
-	"github.com/tarantool/go-discovery/dial"
+	"github.com/tarantool/go-discovery/v2/dial"
 )
 
 var _ tarantool.Dialer = &dial.CompositeDialer{}

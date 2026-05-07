@@ -1,7 +1,7 @@
 package filter
 
 import (
-	"github.com/tarantool/go-discovery"
+	"github.com/tarantool/go-discovery/v2"
 )
 
 // URIAnyOf matches instances that have a URI in the set.

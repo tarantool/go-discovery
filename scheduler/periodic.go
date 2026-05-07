@@ -5,7 +5,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/tarantool/go-discovery"
+	"github.com/tarantool/go-discovery/v2"
 )
 
 // Periodic allows updating the configuration by timer, after each time period.
