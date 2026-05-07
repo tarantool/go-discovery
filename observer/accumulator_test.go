@@ -8,8 +8,8 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/tarantool/go-discovery"
-	"github.com/tarantool/go-discovery/observer"
+	"github.com/tarantool/go-discovery/v2"
+	"github.com/tarantool/go-discovery/v2/observer"
 )
 
 var _ discovery.Observer = observer.NewAccumulator(nil)

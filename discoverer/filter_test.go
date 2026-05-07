@@ -6,8 +6,8 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/tarantool/go-discovery"
-	"github.com/tarantool/go-discovery/discoverer"
+	"github.com/tarantool/go-discovery/v2"
+	"github.com/tarantool/go-discovery/v2/discoverer"
 )
 
 var _ discovery.Discoverer = discoverer.NewFilter(nil)

@@ -5,8 +5,8 @@ import (
 	"sync"
 	"sync/atomic"
 
-	"github.com/tarantool/go-discovery"
-	"github.com/tarantool/go-discovery/subscriber"
+	"github.com/tarantool/go-discovery/v2"
+	"github.com/tarantool/go-discovery/v2/subscriber"
 )
 
 type mockObserver struct {

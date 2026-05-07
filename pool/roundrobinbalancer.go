@@ -3,8 +3,8 @@ package pool
 import (
 	"sync"
 
-	"github.com/tarantool/go-discovery"
-	"github.com/tarantool/go-discovery/pool/internal/container/buffer"
+	"github.com/tarantool/go-discovery/v2"
+	"github.com/tarantool/go-discovery/v2/pool/internal/container/buffer"
 )
 
 // RoundRobinBalancer implements round-robin logic for getting an instance.

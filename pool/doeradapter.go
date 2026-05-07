@@ -3,7 +3,7 @@ package pool
 import (
 	"github.com/tarantool/go-tarantool/v2"
 
-	"github.com/tarantool/go-discovery"
+	"github.com/tarantool/go-discovery/v2"
 )
 
 // DoerAdapter adapts a ModeDoer to a tarantool.Doer interface. The adapter

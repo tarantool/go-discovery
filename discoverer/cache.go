@@ -3,7 +3,7 @@ package discoverer
 import (
 	"context"
 
-	"github.com/tarantool/go-discovery"
+	"github.com/tarantool/go-discovery/v2"
 )
 
 // Cache wraps a Discoverer and caches its result so that subsequent calls to

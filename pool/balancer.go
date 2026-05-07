@@ -1,7 +1,7 @@
 // Package pool implements a pool of connections for Tarantool 3.0.
 package pool
 
-import "github.com/tarantool/go-discovery"
+import "github.com/tarantool/go-discovery/v2"
 
 // Balancer is an interface for pool balancer implementations.
 type Balancer interface {

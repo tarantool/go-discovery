@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/tarantool/go-discovery/dial"
-	"github.com/tarantool/go-discovery/discoverer"
+	"github.com/tarantool/go-discovery/v2/dial"
+	"github.com/tarantool/go-discovery/v2/discoverer"
 	"github.com/tarantool/go-tarantool/v2"
 	tcshelper "github.com/tarantool/go-tarantool/v2/test_helpers/tcs"
 )

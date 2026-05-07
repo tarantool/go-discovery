@@ -8,7 +8,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"github.com/tarantool/go-discovery/pool/internal/container/buffer"
+	"github.com/tarantool/go-discovery/v2/pool/internal/container/buffer"
 )
 
 func TestCircularBuffer_PushAndGet(t *testing.T) {

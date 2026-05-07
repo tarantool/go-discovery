@@ -6,9 +6,9 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/tarantool/go-discovery"
-	"github.com/tarantool/go-discovery/observer"
-	"github.com/tarantool/go-discovery/pool"
+	"github.com/tarantool/go-discovery/v2"
+	"github.com/tarantool/go-discovery/v2/observer"
+	"github.com/tarantool/go-discovery/v2/pool"
 )
 
 type connectableObserver struct {

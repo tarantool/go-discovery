@@ -12,8 +12,8 @@ import (
 	"go.etcd.io/etcd/api/v3/mvccpb"
 	clientv3 "go.etcd.io/etcd/client/v3"
 
-	"github.com/tarantool/go-discovery"
-	"github.com/tarantool/go-discovery/discoverer"
+	"github.com/tarantool/go-discovery/v2"
+	"github.com/tarantool/go-discovery/v2/discoverer"
 )
 
 var _ discovery.Discoverer = discoverer.NewEtcd(nil, "foo")

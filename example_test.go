@@ -15,14 +15,14 @@ import (
 	"github.com/tarantool/go-tarantool/v2"
 	"github.com/tarantool/go-tarantool/v2/test_helpers"
 
-	"github.com/tarantool/go-discovery"
-	"github.com/tarantool/go-discovery/dial"
-	"github.com/tarantool/go-discovery/discoverer"
-	"github.com/tarantool/go-discovery/filter"
-	"github.com/tarantool/go-discovery/observer"
-	"github.com/tarantool/go-discovery/pool"
-	"github.com/tarantool/go-discovery/scheduler"
-	"github.com/tarantool/go-discovery/subscriber"
+	"github.com/tarantool/go-discovery/v2"
+	"github.com/tarantool/go-discovery/v2/dial"
+	"github.com/tarantool/go-discovery/v2/discoverer"
+	"github.com/tarantool/go-discovery/v2/filter"
+	"github.com/tarantool/go-discovery/v2/observer"
+	"github.com/tarantool/go-discovery/v2/pool"
+	"github.com/tarantool/go-discovery/v2/scheduler"
+	"github.com/tarantool/go-discovery/v2/subscriber"
 )
 
 func init() {
@@ -131,7 +131,7 @@ groups:
 			// Group == "foo".
 			filter.GroupOneOf{Groups: []string{"foo"}},
 			// You can play with other filters here, see:
-			// https://github.com/tarantool/go-discovery/filter/
+			// https://github.com/tarantool/go-discovery/v2/filter/
 			// subpackage.
 		)
 

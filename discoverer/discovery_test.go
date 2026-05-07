@@ -1,6 +1,6 @@
 package discoverer_test
 
-import "github.com/tarantool/go-discovery"
+import "github.com/tarantool/go-discovery/v2"
 
 // discoveryCase is a structure that contains a set of values for single test case.
 type discoveryCase struct {

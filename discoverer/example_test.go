@@ -10,7 +10,7 @@ import (
 	clientv3 "go.etcd.io/etcd/client/v3"
 	"go.etcd.io/etcd/tests/v3/integration"
 
-	"github.com/tarantool/go-discovery/discoverer"
+	"github.com/tarantool/go-discovery/v2/discoverer"
 	tcshelper "github.com/tarantool/go-tarantool/v2/test_helpers/tcs"
 )
 

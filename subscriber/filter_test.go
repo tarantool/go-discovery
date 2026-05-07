@@ -8,8 +8,8 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/tarantool/go-discovery"
-	"github.com/tarantool/go-discovery/subscriber"
+	"github.com/tarantool/go-discovery/v2"
+	"github.com/tarantool/go-discovery/v2/subscriber"
 )
 
 var _ discovery.Subscriber = subscriber.NewFilter(nil, nil)
