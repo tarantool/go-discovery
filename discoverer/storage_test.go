@@ -12,6 +12,7 @@ import (
 	"github.com/tarantool/go-storage"
 	"github.com/tarantool/go-storage/driver/etcd"
 	"github.com/tarantool/go-storage/kv"
+	"github.com/tarantool/go-storage/locker"
 	"github.com/tarantool/go-storage/operation"
 	"github.com/tarantool/go-storage/predicate"
 	"github.com/tarantool/go-storage/tx"
@@ -69,6 +70,19 @@ func (m *mockStorage) Range(_ context.Context, _ ...storage.RangeOption) ([]kv.K
 		return nil, m.err
 	}
 	return m.data, nil
+}
+
+func (m *mockStorage) TxFactory() tx.Factory {
+	return m.Tx
+}
+
+func (m *mockStorage) NewLocker(_ context.Context, _ string,
+	_ ...locker.Option) (locker.Locker, error) {
+	return nil, nil
+}
+
+func (m *mockStorage) LockerFactory() locker.Factory {
+	return m
 }
 
 func TestStorage_Discovery_mock_storage(t *testing.T) {
