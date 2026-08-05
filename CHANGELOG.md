@@ -14,11 +14,26 @@ Versioning](http://semver.org/spec/v2.0.0.html) except to the first release.
 
 ### Fixed
 
-## [v2.0.1] - 2025-05-07
+## [v2.0.2] - 2026-08-05
+
+This release bumps `go-config` to v1.5.0 and `go-storage` to v1.6.1,
+pulling in their accumulated fixes and improvements. Most notably, it
+fixes merging of configurations across inheritance levels
+(global → group → replicaset → instance): `MergeDeep` is now the default
+inheritance strategy, so a higher-priority layer that sets a single
+sub-key no longer drops sibling sub-keys contributed by a lower-priority
+layer.
+
+### Changed
+
+- Bump `go-config` from v1.1.0 to v1.5.0 (#67).
+- Bump `go-storage` from v1.2.0 to v1.6.1 (#67).
+
+## [v2.0.1] - 2026-05-07
 
 This release introduces updated library name `go-discovery/v2`.
 
-## [v2.0.0] - 2025-05-06
+## [v2.0.0] - 2026-05-06
 
 This release introduces migration from `tt/lib/cluster` to `go-config`
 and `go-storage` libraries.
