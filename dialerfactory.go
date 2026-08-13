@@ -2,7 +2,7 @@
 package discovery
 
 import (
-	"github.com/tarantool/go-tarantool/v2"
+	"github.com/tarantool/go-tarantool/v3"
 )
 
 // DialerFactory is an interface that wraps the method for creating a tarantool

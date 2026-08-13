@@ -12,6 +12,8 @@ Versioning](http://semver.org/spec/v2.0.0.html) except to the first release.
 
 ### Changed
 
+- `deps`: go-tarantool was bumped to v3.
+
 ### Fixed
 
 ## [v2.0.2] - 2026-08-05

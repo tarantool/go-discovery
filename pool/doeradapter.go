@@ -1,7 +1,7 @@
 package pool
 
 import (
-	"github.com/tarantool/go-tarantool/v2"
+	"github.com/tarantool/go-tarantool/v3"
 
 	"github.com/tarantool/go-discovery/v2"
 )
@@ -22,6 +22,6 @@ func NewDoerAdapter(doer ModeDoer, mode discovery.Mode) *DoerAdapter {
 }
 
 // Do executes the request with the adapter's mode.
-func (d *DoerAdapter) Do(request tarantool.Request) *tarantool.Future {
+func (d *DoerAdapter) Do(request tarantool.Request) tarantool.Future {
 	return d.doer.Do(request, d.mode)
 }

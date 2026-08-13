@@ -3,7 +3,9 @@ package discoverer_test
 import (
 	"bytes"
 	"context"
+	"errors"
 	"fmt"
+	"io"
 	"net"
 	"sync"
 	"testing"
@@ -11,7 +13,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"github.com/tarantool/go-tarantool/v2"
+	"github.com/tarantool/go-tarantool/v3"
 
 	"github.com/tarantool/go-discovery/v2"
 	"github.com/tarantool/go-discovery/v2/dial"
@@ -27,6 +29,9 @@ type mockIoConn struct {
 	readbuf, writebuf bytes.Buffer
 	// Close buffer.
 	closed chan struct{}
+	// Signals Read() that the connection is closed.
+	done      chan struct{}
+	closeOnce sync.Once
 	// Context to stop conn.
 	ctx context.Context
 }
@@ -36,6 +41,14 @@ func (m *mockIoConn) Read(b []byte) (int, error) {
 	m.written <- struct{}{}
 
 	ret, err := m.readbuf.Read(b)
+	if errors.Is(err, io.EOF) {
+		select {
+		case <-m.done:
+			return 0, net.ErrClosed
+		case <-m.ctx.Done():
+			return 0, m.ctx.Err()
+		}
+	}
 
 	if ret != 0 && m.read != nil {
 		select {
@@ -64,7 +77,10 @@ func (m *mockIoConn) Flush() error {
 }
 
 func (m *mockIoConn) Close() error {
-	m.closed <- struct{}{}
+	m.closeOnce.Do(func() {
+		close(m.done)
+		m.closed <- struct{}{}
+	})
 	return nil
 }
 
@@ -89,6 +105,7 @@ type mockIoDialer struct {
 func newMockIoConn(ctx context.Context) *mockIoConn {
 	conn := new(mockIoConn)
 	conn.closed = make(chan struct{}, 1)
+	conn.done = make(chan struct{})
 	conn.written = make(chan struct{}, 1)
 	conn.ctx = ctx
 	return conn

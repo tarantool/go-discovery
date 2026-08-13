@@ -8,8 +8,8 @@ import (
 
 	"github.com/tarantool/go-discovery/v2/dial"
 	"github.com/tarantool/go-discovery/v2/discoverer"
-	"github.com/tarantool/go-tarantool/v2"
-	tcshelper "github.com/tarantool/go-tarantool/v2/test_helpers/tcs"
+	"github.com/tarantool/go-tarantool/v3"
+	tcshelper "github.com/tarantool/go-tarantool/v3/test_helpers/tcs"
 )
 
 func Example_discoverer_Connectable_with_Tarantool() {

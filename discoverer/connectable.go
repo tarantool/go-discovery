@@ -7,7 +7,7 @@ import (
 	"reflect"
 	"sync"
 
-	"github.com/tarantool/go-tarantool/v2"
+	"github.com/tarantool/go-tarantool/v3"
 	"golang.org/x/exp/slices"
 
 	"github.com/tarantool/go-discovery/v2"
