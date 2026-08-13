@@ -17,7 +17,7 @@ import (
 
 	clientv3 "go.etcd.io/etcd/client/v3"
 
-	"github.com/tarantool/go-tarantool/v2"
+	"github.com/tarantool/go-tarantool/v3"
 
 	"github.com/tarantool/go-discovery/v2"
 	"github.com/tarantool/go-discovery/v2/dial"

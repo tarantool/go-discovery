@@ -1,7 +1,7 @@
 package discoverer
 
 import (
-	"github.com/tarantool/go-tarantool/v2"
+	"github.com/tarantool/go-tarantool/v3"
 
 	"github.com/tarantool/go-storage"
 	tcsstorage "github.com/tarantool/go-storage/driver/tcs"

@@ -11,8 +11,8 @@ import (
 
 	"github.com/tarantool/go-discovery/v2"
 
-	"github.com/tarantool/go-tarantool/v2"
-	ttpool "github.com/tarantool/go-tarantool/v2/pool"
+	"github.com/tarantool/go-tarantool/v3"
+	ttpool "github.com/tarantool/go-tarantool/v3/pool"
 )
 
 var (
@@ -51,9 +51,9 @@ type Pool struct {
 	// factory is a DialerFactory used to create connection settings to
 	// instances.
 	factory discovery.DialerFactory
-	// pool is ttpool.ConnectionPool object that used to handle connections
+	// pool is ttpool.Pool object that used to handle connections
 	// and execute requests.
-	pool atomic.Pointer[ttpool.ConnectionPool]
+	pool atomic.Pointer[ttpool.Pool]
 	// states is a thread-safe of map[string]*instanceState. We need the
 	// thread-safe to avoid data races between Pool.Observer() and
 	// connectionHandler.
@@ -133,27 +133,23 @@ func (p *Pool) Observe(events []discovery.Event, err error) {
 
 // Do executes the request on instances with the specified mode. You could
 // use ModeAdapter type to adapt it to tarantool.Doer interface.
-func (p *Pool) Do(request tarantool.Request, mode discovery.Mode) *tarantool.Future {
+func (p *Pool) Do(request tarantool.Request, mode discovery.Mode) tarantool.Future {
 	for {
 		pool := p.pool.Load()
 		if pool == nil {
-			future := tarantool.NewFuture(request)
-			future.SetError(ErrUnsubscribed)
-			return future
+			return tarantool.NewFutureWithErr(request, ErrUnsubscribed)
 		}
 
 		next, exist := p.balancer.Next(mode)
 		if !exist {
-			future := tarantool.NewFuture(request)
-			future.SetError(ErrNoConnectedInstances)
-			return future
+			return tarantool.NewFutureWithErr(request, ErrNoConnectedInstances)
 		}
 
 		// If the pool is already closed and we recreated the pool and refilled
 		// the balancer somewhere between p.pool.Load(), then we will retry
 		// with the case:
 		// err == ttpool.ErrNoHealthyInstance. So all should be fine here.
-		future := pool.DoInstance(request, next)
+		future := pool.DoOn(request, next)
 
 		var err error
 		select {
@@ -182,16 +178,16 @@ func (p *Pool) Do(request tarantool.Request, mode discovery.Mode) *tarantool.Fut
 // trySubscribe tries to subscribe and return pool, true if subscribed.
 // It may return pool, false if it is already subscribed.
 // It may return nil, false if it is unable to subscribe (should not happen).
-func (p *Pool) trySubscribe() (*ttpool.ConnectionPool, bool) {
+func (p *Pool) trySubscribe() (*ttpool.Pool, bool) {
 	pool := p.pool.Load()
 	if pool != nil {
 		return pool, false
 	}
 
 	var err error
-	pool, err = ttpool.ConnectWithOpts(context.Background(), nil, ttpool.Opts{
-		CheckTimeout:      time.Second,
-		ConnectionHandler: newConnectionHandler(p),
+	pool, err = ttpool.NewWithOpts(context.Background(), nil, ttpool.Opts{
+		CheckTimeout: time.Second,
+		Handler:      newConnectionHandler(p),
 	})
 	if err != nil {
 		// It should not happen in fact, but it looks better than panic.
@@ -211,7 +207,7 @@ func (p *Pool) unsubscribe(err error) {
 
 	// It waits for cancellation and should unregister all endpoints with
 	// a handler.
-	pool.Close()
+	_ = pool.Close()
 
 	// Ensure that all done.
 	p.states.Range(func(_, value any) bool {
@@ -319,11 +315,11 @@ func (h *connectionHandler) Deactivated(name string, _ *tarantool.Connection,
 // roleToMode maps ttpool.Role to discovery.Mode.
 func roleToMode(role ttpool.Role) discovery.Mode {
 	switch role {
-	case ttpool.UnknownRole:
+	case ttpool.RoleUnknown:
 		return discovery.ModeAny
-	case ttpool.MasterRole:
+	case ttpool.RoleMaster:
 		return discovery.ModeRW
-	case ttpool.ReplicaRole:
+	case ttpool.RoleReplica:
 		return discovery.ModeRO
 	default:
 		// It should not happen, but panic is not a good idea.

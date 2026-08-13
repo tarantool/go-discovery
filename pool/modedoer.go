@@ -1,7 +1,7 @@
 package pool
 
 import (
-	"github.com/tarantool/go-tarantool/v2"
+	"github.com/tarantool/go-tarantool/v3"
 
 	"github.com/tarantool/go-discovery/v2"
 )
@@ -10,5 +10,5 @@ import (
 // specified mode.
 type ModeDoer interface {
 	// Do executes the request on an instance with the specified mode.
-	Do(tarantool.Request, discovery.Mode) *tarantool.Future
+	Do(tarantool.Request, discovery.Mode) tarantool.Future
 }

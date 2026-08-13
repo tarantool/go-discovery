@@ -10,8 +10,8 @@ import (
 	"github.com/tarantool/go-discovery/v2/dial"
 	"github.com/tarantool/go-discovery/v2/discoverer"
 	"github.com/tarantool/go-discovery/v2/filter"
-	"github.com/tarantool/go-tarantool/v2/test_helpers"
-	"github.com/tarantool/go-tarantool/v2/test_helpers/tcs"
+	"github.com/tarantool/go-tarantool/v3/test_helpers"
+	"github.com/tarantool/go-tarantool/v3/test_helpers/tcs"
 )
 
 func TestDiscoverer_Tcs_and_Filter(t *testing.T) {

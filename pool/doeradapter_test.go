@@ -5,7 +5,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"github.com/tarantool/go-tarantool/v2"
+	"github.com/tarantool/go-tarantool/v3"
 
 	"github.com/tarantool/go-discovery/v2"
 	"github.com/tarantool/go-discovery/v2/pool"
@@ -20,11 +20,11 @@ type mockRequest struct {
 type mockModeDoer struct {
 	Request tarantool.Request
 	Mode    discovery.Mode
-	Ret     *tarantool.Future
+	Ret     tarantool.Future
 }
 
 func (d *mockModeDoer) Do(request tarantool.Request,
-	mode discovery.Mode) *tarantool.Future {
+	mode discovery.Mode) tarantool.Future {
 	d.Request = request
 	d.Mode = mode
 	return d.Ret
@@ -33,7 +33,7 @@ func (d *mockModeDoer) Do(request tarantool.Request,
 func TestModeDoer(t *testing.T) {
 	modes := []discovery.Mode{discovery.ModeRO, discovery.ModeRW, discovery.ModeAny}
 	request := mockRequest{}
-	future := &tarantool.Future{}
+	future := tarantool.NewFutureWithErr(request, nil)
 
 	for _, mode := range modes {
 		t.Run(mode.String(), func(t *testing.T) {
