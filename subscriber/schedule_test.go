@@ -39,12 +39,18 @@ func (s *mockScheduler) Stop() {
 }
 
 type mockDiscoverer struct {
-	cnt       atomic.Int32
-	instances atomic.Pointer[[]discovery.Instance]
+	cnt           atomic.Int32
+	instances     atomic.Pointer[[]discovery.Instance]
+	discoveryDone chan struct{}
 }
 
 func (d *mockDiscoverer) Discovery(ctx context.Context) ([]discovery.Instance, error) {
 	d.cnt.Add(1)
+	defer func() {
+		if d.discoveryDone != nil {
+			d.discoveryDone <- struct{}{}
+		}
+	}()
 
 	select {
 	case <-ctx.Done():
@@ -250,7 +256,10 @@ func TestSchedule_Subscribe_Events(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			sched := &mockScheduler{doStep: make(chan struct{}, 1)}
 			sched.stepWg.Add(1)
-			disc := &mockDiscoverer{instances: atomic.Pointer[[]discovery.Instance]{}}
+			disc := &mockDiscoverer{
+				instances:     atomic.Pointer[[]discovery.Instance]{},
+				discoveryDone: make(chan struct{}, 1),
+			}
 			disc.instances.Store(&tc.startInst)
 
 			schedule := subscriber.NewSchedule(sched, disc)
@@ -259,15 +268,18 @@ func TestSchedule_Subscribe_Events(t *testing.T) {
 			obs := newMockObserver()
 			err := schedule.Subscribe(context.Background(), obs)
 			assert.NoError(t, err)
+			<-disc.discoveryDone
 
 			sched.doStep <- struct{}{}
 			sched.stepWg.Wait()
+			<-disc.discoveryDone
 
 			disc.instances.Store(&tc.updateInst)
 			sched.stepWg.Add(1)
 
 			sched.doStep <- struct{}{}
 			sched.stepWg.Wait()
+			<-disc.discoveryDone
 
 			schedule.Unsubscribe(obs)
 
@@ -311,7 +323,10 @@ func TestSchedule_Subscribe_MultipleEvents(t *testing.T) {
 
 	sched := &mockScheduler{doStep: make(chan struct{}, 1)}
 	sched.stepWg.Add(1)
-	disc := &mockDiscoverer{instances: atomic.Pointer[[]discovery.Instance]{}}
+	disc := &mockDiscoverer{
+		instances:     atomic.Pointer[[]discovery.Instance]{},
+		discoveryDone: make(chan struct{}, 1),
+	}
 	disc.instances.Store(&startInst)
 
 	schedule := subscriber.NewSchedule(sched, disc)
@@ -320,15 +335,18 @@ func TestSchedule_Subscribe_MultipleEvents(t *testing.T) {
 	obs := newMockObserver()
 	err := schedule.Subscribe(context.Background(), obs)
 	assert.NoError(t, err)
+	<-disc.discoveryDone
 
 	sched.doStep <- struct{}{}
 	sched.stepWg.Wait()
+	<-disc.discoveryDone
 
 	disc.instances.Store(&endInst)
 	sched.stepWg.Add(1)
 
 	sched.doStep <- struct{}{}
 	sched.stepWg.Wait()
+	<-disc.discoveryDone
 
 	schedule.Unsubscribe(obs)
 

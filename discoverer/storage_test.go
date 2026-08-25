@@ -9,14 +9,14 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/tarantool/go-discovery/v2"
 	"github.com/tarantool/go-discovery/v2/discoverer"
-	"github.com/tarantool/go-storage"
-	"github.com/tarantool/go-storage/driver/etcd"
-	"github.com/tarantool/go-storage/kv"
-	"github.com/tarantool/go-storage/locker"
-	"github.com/tarantool/go-storage/operation"
-	"github.com/tarantool/go-storage/predicate"
-	"github.com/tarantool/go-storage/tx"
-	"github.com/tarantool/go-storage/watch"
+	"github.com/tarantool/go-storage/v2"
+	"github.com/tarantool/go-storage/v2/driver/etcd"
+	"github.com/tarantool/go-storage/v2/kv"
+	"github.com/tarantool/go-storage/v2/locker"
+	"github.com/tarantool/go-storage/v2/operation"
+	"github.com/tarantool/go-storage/v2/predicate"
+	"github.com/tarantool/go-storage/v2/tx"
+	"github.com/tarantool/go-storage/v2/watch"
 	clientv3 "go.etcd.io/etcd/client/v3"
 	"go.etcd.io/etcd/tests/v3/integration"
 )
@@ -57,7 +57,7 @@ type mockStorage struct {
 	err  error
 }
 
-func (m *mockStorage) Watch(_ context.Context, _ []byte, _ ...watch.Option) <-chan watch.Event {
+func (m *mockStorage) Watch(_ context.Context, _ []byte) <-chan watch.Event {
 	return nil
 }
 

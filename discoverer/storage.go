@@ -5,7 +5,7 @@ import (
 	"errors"
 
 	"github.com/tarantool/go-discovery/v2"
-	"github.com/tarantool/go-storage"
+	"github.com/tarantool/go-storage/v2"
 )
 
 // ErrMissingStorage is returned from Discovery when the discoverer was

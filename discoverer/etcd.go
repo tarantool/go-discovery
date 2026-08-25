@@ -5,8 +5,8 @@ import (
 
 	clientv3 "go.etcd.io/etcd/client/v3"
 
-	"github.com/tarantool/go-storage"
-	etcdstorage "github.com/tarantool/go-storage/driver/etcd"
+	"github.com/tarantool/go-storage/v2"
+	etcdstorage "github.com/tarantool/go-storage/v2/driver/etcd"
 )
 
 // EtcdClient is the interface required to create an etcd-backed storage.

@@ -13,6 +13,8 @@ Versioning](http://semver.org/spec/v2.0.0.html) except to the first release.
 ### Changed
 
 - `deps`: go-tarantool was bumped to v3.
+- `deps`: go-storage and go-config were bumped to v2.
+- `deps`: Go was bumped to v1.26.5.
 
 ### Fixed
 
