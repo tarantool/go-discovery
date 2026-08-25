@@ -3,8 +3,8 @@ package discoverer
 import (
 	"github.com/tarantool/go-tarantool/v3"
 
-	"github.com/tarantool/go-storage"
-	tcsstorage "github.com/tarantool/go-storage/driver/tcs"
+	"github.com/tarantool/go-storage/v2"
+	tcsstorage "github.com/tarantool/go-storage/v2/driver/tcs"
 )
 
 // TarantoolClient is the interface required to create a TCS-backed storage.

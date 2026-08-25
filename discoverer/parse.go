@@ -7,11 +7,11 @@ import (
 	"path"
 	"strings"
 
-	"github.com/tarantool/go-config"
-	ttconfig "github.com/tarantool/go-config/tarantool"
+	"github.com/tarantool/go-config/v2"
+	ttconfig "github.com/tarantool/go-config/v2/tarantool"
 	"github.com/tarantool/go-discovery/v2"
-	"github.com/tarantool/go-storage"
-	"github.com/tarantool/go-storage/integrity"
+	"github.com/tarantool/go-storage/v2"
+	"github.com/tarantool/go-storage/v2/integrity"
 )
 
 // rawBytesMarshaller is a pass-through marshaller for []byte values.
@@ -45,10 +45,18 @@ func buildInstances(
 	st storage.Storage,
 	prefix string,
 ) ([]discovery.Instance, error) {
-	typed := integrity.NewTypedBuilder[[]byte](st).
-		WithPrefix(normalizeConfigPrefix(prefix)).
+	prefixed, err := storage.Prefixed(strings.TrimRight(normalizeConfigPrefix(prefix), "/"), st)
+	if err != nil {
+		return nil, fmt.Errorf("failed to configure storage prefix: %w", err)
+	}
+
+	codec, err := integrity.NewCodecBuilder[[]byte]().
 		WithMarshaller(rawBytesMarshaller{}).
 		Build()
+	if err != nil {
+		return nil, fmt.Errorf("failed to build storage codec: %w", err)
+	}
+	typed := codec.Bind(prefixed)
 
 	cfg, err := ttconfig.New().WithStorage(typed).WithoutSchema().Build(ctx)
 	if err != nil {
