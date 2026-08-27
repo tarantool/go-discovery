@@ -19,13 +19,13 @@ import (
 
 	"github.com/tarantool/go-tarantool/v3"
 
-	"github.com/tarantool/go-discovery/v2"
-	"github.com/tarantool/go-discovery/v2/dial"
-	"github.com/tarantool/go-discovery/v2/discoverer"
-	"github.com/tarantool/go-discovery/v2/filter"
-	"github.com/tarantool/go-discovery/v2/pool"
-	"github.com/tarantool/go-discovery/v2/scheduler"
-	"github.com/tarantool/go-discovery/v2/subscriber"
+	"github.com/tarantool/go-discovery/v3"
+	"github.com/tarantool/go-discovery/v3/dial"
+	"github.com/tarantool/go-discovery/v3/discoverer"
+	"github.com/tarantool/go-discovery/v3/filter"
+	"github.com/tarantool/go-discovery/v3/pool"
+	"github.com/tarantool/go-discovery/v3/scheduler"
+	"github.com/tarantool/go-discovery/v3/subscriber"
 )
 
 func main() {
@@ -67,7 +67,7 @@ func main() {
 			// Group == "foo".
 			filter.GroupOneOf{Groups: []string{"foo"}},
 			// You can play with other filters here, see:
-			// https://github.com/tarantool/go-discovery/v2/filter/
+			// https://github.com/tarantool/go-discovery/v3/filter/
 			// subpackage.
 		)
 
@@ -200,4 +200,4 @@ make godoc_open
 * [The scheduler subpackage](./scheduler/example_test.go);
 
 [design-document]: https://www.notion.so/Cluster-discovery-Go-library-3613a0bd7e3a439d86f99c083d9d8ce4
-[godoc-link]: http://localhost:6060/pkg/github.com/tarantool/go-discovery/v2
+[godoc-link]: http://localhost:6060/pkg/github.com/tarantool/go-discovery/v3

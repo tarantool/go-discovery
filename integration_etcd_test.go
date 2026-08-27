@@ -12,12 +12,12 @@ import (
 	clientv3 "go.etcd.io/etcd/client/v3"
 	"go.etcd.io/etcd/tests/v3/integration"
 
-	"github.com/tarantool/go-discovery/v2"
-	"github.com/tarantool/go-discovery/v2/dial"
-	"github.com/tarantool/go-discovery/v2/discoverer"
-	"github.com/tarantool/go-discovery/v2/filter"
-	"github.com/tarantool/go-discovery/v2/scheduler"
-	"github.com/tarantool/go-discovery/v2/subscriber"
+	"github.com/tarantool/go-discovery/v3"
+	"github.com/tarantool/go-discovery/v3/dial"
+	"github.com/tarantool/go-discovery/v3/discoverer"
+	"github.com/tarantool/go-discovery/v3/filter"
+	"github.com/tarantool/go-discovery/v3/scheduler"
+	"github.com/tarantool/go-discovery/v3/subscriber"
 )
 
 func TestEtcdWatchScheduler_Etcd_Wait(t *testing.T) {

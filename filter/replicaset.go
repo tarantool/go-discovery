@@ -1,7 +1,7 @@
 package filter
 
 import (
-	"github.com/tarantool/go-discovery/v2"
+	"github.com/tarantool/go-discovery/v3"
 )
 
 // ReplicasetOneOf matches instances that have a replicaset in the set.

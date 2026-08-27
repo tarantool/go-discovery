@@ -3,7 +3,7 @@ package pool
 import (
 	"github.com/tarantool/go-tarantool/v3"
 
-	"github.com/tarantool/go-discovery/v2"
+	"github.com/tarantool/go-discovery/v3"
 )
 
 // ModeDoer is an interface to execute a request on an instance with the

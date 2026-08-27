@@ -3,7 +3,7 @@ package dial
 import (
 	"fmt"
 
-	"github.com/tarantool/go-discovery/v2"
+	"github.com/tarantool/go-discovery/v3"
 	"github.com/tarantool/go-tarantool/v3"
 )
 

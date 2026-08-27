@@ -12,11 +12,27 @@ Versioning](http://semver.org/spec/v2.0.0.html) except to the first release.
 
 ### Changed
 
-- `deps`: go-tarantool was bumped to v3.
-- `deps`: go-storage and go-config were bumped to v2.
-- `deps`: Go was bumped to v1.26.5.
-
 ### Fixed
+
+## [v3.0.0] - 2026-08-27
+
+This release bumps `go-tarantool` to v3, and `go-storage` and `go-config`
+to v2. These libraries expose their types through the go-discovery public
+API, so this is a breaking release.
+
+The most notable change is that `tarantool.Future` became an interface
+returned by value instead of a pointer: `Pool.Do`, `DoerAdapter.Do`, and the
+`ModeDoer.Do` interface method now return `tarantool.Future` instead of
+`*tarantool.Future`. The `discoverer.NewStorage`, `NewEtcd`, and
+`NewTarantool` functions now accept storage clients from `go-storage/v2`
+(which itself builds on `go-config/v2`), so callers that pass custom clients
+must migrate them to the new module versions.
+
+### Changed
+
+- `deps`: go-tarantool was bumped to v3 (#68).
+- `deps`: go-storage and go-config were bumped to v2 (#69).
+- `deps`: Go was bumped to v1.26.5.
 
 ## [v2.0.2] - 2026-08-05
 

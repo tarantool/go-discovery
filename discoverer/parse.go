@@ -9,7 +9,7 @@ import (
 
 	"github.com/tarantool/go-config/v2"
 	ttconfig "github.com/tarantool/go-config/v2/tarantool"
-	"github.com/tarantool/go-discovery/v2"
+	"github.com/tarantool/go-discovery/v3"
 	"github.com/tarantool/go-storage/v2"
 	"github.com/tarantool/go-storage/v2/integrity"
 )
