@@ -4,7 +4,7 @@ package observer
 import (
 	"reflect"
 
-	"github.com/tarantool/go-discovery/v2"
+	"github.com/tarantool/go-discovery/v3"
 )
 
 type accumulatorEvent struct {

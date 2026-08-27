@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/tarantool/go-discovery/v2"
+	"github.com/tarantool/go-discovery/v3"
 )
 
 // Filter filters the list of discovered nodes by some set of filters.

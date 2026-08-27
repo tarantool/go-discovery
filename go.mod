@@ -1,8 +1,6 @@
-module github.com/tarantool/go-discovery/v2
+module github.com/tarantool/go-discovery/v3
 
 go 1.26.5
-
-retract v2.0.0
 
 require (
 	github.com/stretchr/testify v1.11.1

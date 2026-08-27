@@ -7,8 +7,8 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"github.com/tarantool/go-discovery/v2"
-	"github.com/tarantool/go-discovery/v2/discoverer"
+	"github.com/tarantool/go-discovery/v3"
+	"github.com/tarantool/go-discovery/v3/discoverer"
 	"github.com/tarantool/go-storage/v2"
 	"github.com/tarantool/go-storage/v2/driver/etcd"
 	"github.com/tarantool/go-storage/v2/kv"
