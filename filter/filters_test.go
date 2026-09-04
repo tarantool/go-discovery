@@ -16,6 +16,7 @@ var _ discovery.Filter = filter.ModeOneOf{}
 var _ discovery.Filter = filter.URIAnyOf{}
 var _ discovery.Filter = filter.RolesContain{}
 var _ discovery.Filter = filter.LabelsContain{}
+var _ discovery.Filter = filter.ShardingRolesContain{}
 
 func TestFilters(t *testing.T) {
 	cases := []struct {
@@ -261,6 +262,64 @@ func TestFilters(t *testing.T) {
 			Filter: filter.LabelsContain{map[string]string{
 				"bar": "foo",
 				"zoo": "car",
+			}},
+			Expected: true,
+		},
+		{
+			Name:     "sharding_roles_contain_empty_instance_and_filter",
+			Instance: discovery.Instance{},
+			Filter:   filter.ShardingRolesContain{},
+			Expected: true,
+		},
+		{
+			Name: "sharding_roles_contain_empty_filter",
+			Instance: discovery.Instance{ShardingRoles: []discovery.ShardingRole{
+				discovery.ShardingRoleStorage,
+			}},
+			Filter:   filter.ShardingRolesContain{},
+			Expected: true,
+		},
+		{
+			Name: "sharding_roles_contain_no_match",
+			Instance: discovery.Instance{ShardingRoles: []discovery.ShardingRole{
+				discovery.ShardingRoleStorage,
+			}},
+			Filter: filter.ShardingRolesContain{[]discovery.ShardingRole{
+				discovery.ShardingRoleRebalancer,
+			}},
+			Expected: false,
+		},
+		{
+			Name: "sharding_roles_contain_not_full_match",
+			Instance: discovery.Instance{ShardingRoles: []discovery.ShardingRole{
+				discovery.ShardingRoleStorage,
+			}},
+			Filter: filter.ShardingRolesContain{[]discovery.ShardingRole{
+				discovery.ShardingRoleStorage,
+				discovery.ShardingRoleRebalancer,
+			}},
+			Expected: false,
+		},
+		{
+			Name: "sharding_roles_contain_full_match",
+			Instance: discovery.Instance{ShardingRoles: []discovery.ShardingRole{
+				discovery.ShardingRoleStorage,
+				discovery.ShardingRoleRebalancer,
+			}},
+			Filter: filter.ShardingRolesContain{[]discovery.ShardingRole{
+				discovery.ShardingRoleStorage,
+				discovery.ShardingRoleRebalancer,
+			}},
+			Expected: true,
+		},
+		{
+			Name: "sharding_roles_contain_extra_match",
+			Instance: discovery.Instance{ShardingRoles: []discovery.ShardingRole{
+				discovery.ShardingRoleStorage,
+				discovery.ShardingRoleRebalancer,
+			}},
+			Filter: filter.ShardingRolesContain{[]discovery.ShardingRole{
+				discovery.ShardingRoleStorage,
 			}},
 			Expected: true,
 		},

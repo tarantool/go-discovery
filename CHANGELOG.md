@@ -10,6 +10,11 @@ Versioning](http://semver.org/spec/v2.0.0.html) except to the first release.
 
 ### Added
 
+* `Instance` now exposes a `ShardingRoles` field — a set of the instance's
+  sharding roles as defined in the `sharding.roles` section of the cluster
+  config — along with the `filter.ShardingRolesContain` filter to match
+  instances that have all sharding roles from the set (#71).
+
 ### Changed
 
 ### Fixed
