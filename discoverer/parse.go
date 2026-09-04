@@ -29,14 +29,15 @@ func (rawBytesMarshaller) Unmarshal(data []byte) ([]byte, error) {
 
 // Pre-built key paths read for each instance.
 var (
-	pathFailover  = config.NewKeyPath("replication/failover")
-	pathMode      = config.NewKeyPath("database/mode")
-	pathLeader    = config.NewKeyPath("leader")
-	pathAdvertise = config.NewKeyPath("iproto/advertise/client")
-	pathListen    = config.NewKeyPath("iproto/listen")
-	pathRoles     = config.NewKeyPath("roles")
-	pathLabels    = config.NewKeyPath("labels")
-	pathRolesCfg  = config.NewKeyPath("roles_cfg")
+	pathFailover      = config.NewKeyPath("replication/failover")
+	pathMode          = config.NewKeyPath("database/mode")
+	pathLeader        = config.NewKeyPath("leader")
+	pathAdvertise     = config.NewKeyPath("iproto/advertise/client")
+	pathListen        = config.NewKeyPath("iproto/listen")
+	pathRoles         = config.NewKeyPath("roles")
+	pathLabels        = config.NewKeyPath("labels")
+	pathRolesCfg      = config.NewKeyPath("roles_cfg")
+	pathShardingRoles = config.NewKeyPath("sharding/roles")
 )
 
 // buildInstances retrieves and parses instance configurations from a storage.
@@ -100,6 +101,7 @@ func buildInstances(
 		var roles []string
 		var labels map[string]string
 		var rolesCfg map[string]any
+		var shardingRoles []discovery.ShardingRole
 		if err := get(pathFailover, &failover, "failover"); err != nil {
 			return nil, err
 		}
@@ -121,6 +123,9 @@ func buildInstances(
 		if err := get(pathRolesCfg, &rolesCfg, "roles_cfg"); err != nil {
 			return nil, err
 		}
+		if err := get(pathShardingRoles, &shardingRoles, "sharding roles"); err != nil {
+			return nil, err
+		}
 
 		instance := discovery.Instance{
 			Group:      parts.group,
@@ -128,9 +133,10 @@ func buildInstances(
 			Name:       parts.instance,
 			Mode: resolveMode(failover, mode, leader, parts.instance,
 				replicasetCount[parts.group+"/"+parts.replicaset]),
-			Roles:    roles,
-			Labels:   labels,
-			RolesCfg: rolesCfg,
+			Roles:         roles,
+			Labels:        labels,
+			RolesCfg:      rolesCfg,
+			ShardingRoles: shardingRoles,
 		}
 
 		if advertiseClient != "" {

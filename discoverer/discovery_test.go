@@ -488,6 +488,110 @@ groups:
 			},
 		},
 		{
+			Name: "sharding roles",
+			Values: []string{
+				`
+groups:
+  foo:
+    replicasets:
+      bar:
+        sharding:
+          roles: [storage]
+        instances:
+          zoo:
+            roles:
+            - roles.tqe-orchestrator
+            roles_cfg:
+              roles.tqe-orchestrator:
+                partitions: 10
+                rebalance_timeout: 5.0
+                sync_timeout: 1.0
+      car:
+        sharding:
+          roles: [router, rebalancer]
+        instances:
+          tmp: {}
+`},
+			Expected: []discovery.Instance{
+				{
+					Group:      "foo",
+					Replicaset: "bar",
+					Name:       "zoo",
+					Mode:       discovery.ModeRW,
+					Roles:      []string{"roles.tqe-orchestrator"},
+					RolesCfg: map[string]any{
+						"roles.tqe-orchestrator": map[string]any{
+							"partitions":        int64(10),
+							"rebalance_timeout": float64(5),
+							"sync_timeout":      float64(1),
+						},
+					},
+					ShardingRoles: []discovery.ShardingRole{discovery.ShardingRoleStorage},
+				},
+				{
+					Group:      "foo",
+					Replicaset: "car",
+					Name:       "tmp",
+					Mode:       discovery.ModeRW,
+					ShardingRoles: []discovery.ShardingRole{
+						discovery.ShardingRoleRouter,
+						discovery.ShardingRoleRebalancer,
+					},
+				},
+			},
+		},
+		{
+			Name: "sharding roles inheritance",
+			Values: []string{
+				`
+sharding:
+  roles: [storage]
+groups:
+  foo:
+    replicasets:
+      bar:
+        instances:
+          zoo: {}
+          car: {}
+      tar:
+        sharding:
+          roles: [router]
+        instances:
+          moo: {}
+          boo: {}
+`},
+			Expected: []discovery.Instance{
+				{
+					Group:         "foo",
+					Replicaset:    "bar",
+					Name:          "zoo",
+					Mode:          discovery.ModeRO,
+					ShardingRoles: []discovery.ShardingRole{discovery.ShardingRoleStorage},
+				},
+				{
+					Group:         "foo",
+					Replicaset:    "bar",
+					Name:          "car",
+					Mode:          discovery.ModeRO,
+					ShardingRoles: []discovery.ShardingRole{discovery.ShardingRoleStorage},
+				},
+				{
+					Group:         "foo",
+					Replicaset:    "tar",
+					Name:          "moo",
+					Mode:          discovery.ModeRO,
+					ShardingRoles: []discovery.ShardingRole{discovery.ShardingRoleRouter},
+				},
+				{
+					Group:         "foo",
+					Replicaset:    "tar",
+					Name:          "boo",
+					Mode:          discovery.ModeRO,
+					ShardingRoles: []discovery.ShardingRole{discovery.ShardingRoleRouter},
+				},
+			},
+		},
+		{
 			Name: "full set of params",
 			Values: []string{
 				`
@@ -497,6 +601,8 @@ groups:
   foo:
     replicasets:
       bar:
+        sharding:
+          roles: [storage]
         instances:
           zoo:
             iproto:
@@ -521,6 +627,7 @@ groups:
 					Labels: map[string]string{
 						"tags": "any,bar,3",
 					},
+					ShardingRoles: []discovery.ShardingRole{discovery.ShardingRoleStorage},
 				},
 			},
 		},
