@@ -19,4 +19,6 @@ type Instance struct {
 	// RolesCfg is a map of role name to its configuration, as defined in
 	// the roles_cfg section of the cluster config for this instance.
 	RolesCfg map[string]any
+	// ShardingRoles is a set of the instance's sharding roles.
+	ShardingRoles []ShardingRole
 }
