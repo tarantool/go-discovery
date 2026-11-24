@@ -199,5 +199,5 @@ make godoc_open
 * [The pool subpackage](./pool/example_test.go);
 * [The scheduler subpackage](./scheduler/example_test.go);
 
-[design-document]: https://www.notion.so/Cluster-discovery-Go-library-3613a0bd7e3a439d86f99c083d9d8ce4
+[design-document]: DESIGN.md
 [godoc-link]: http://localhost:6060/pkg/github.com/tarantool/go-discovery/v3
