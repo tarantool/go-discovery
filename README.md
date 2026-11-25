@@ -1,7 +1,7 @@
 # discovery
 
 Package discovery implements cluster discovery helpers for Tarantool 3.0
-implemented in Go language according to the [design document][design-document].
+implemented in Go language.
 
 The main example demonstrates how to create a pool of connections based
 on a cluster configuration in etcd.
@@ -199,5 +199,4 @@ make godoc_open
 * [The pool subpackage](./pool/example_test.go);
 * [The scheduler subpackage](./scheduler/example_test.go);
 
-[design-document]: https://www.notion.so/Cluster-discovery-Go-library-3613a0bd7e3a439d86f99c083d9d8ce4
 [godoc-link]: http://localhost:6060/pkg/github.com/tarantool/go-discovery/v3
